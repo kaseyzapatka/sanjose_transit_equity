@@ -10,14 +10,18 @@
 #   • an optional choropleth map helper
 # ==========================================================================
 
-# import necessary libraries
+# for data management
 import os
 import geopandas as gpd
 import pandas as pd
+# for data visualization 
 import seaborn as sns
 from shapely.geometry import Point
 import matplotlib.pyplot as plt
 import mapclassify
+# for census analysis 
+from pygris import tracts, places, validate_state
+from pygris.data import get_census
 
 
 # ==========================================================================
@@ -205,3 +209,210 @@ def choropleth_map(
 
     
     plt.show()
+
+
+import geopandas as gpd
+from pygris import tracts, places, validate_state
+from pygris.data import get_census
+
+
+# ======================================================
+#  1. EXTRACT ACS
+# ======================================================
+def pull_acs_data(state="CA", year=2022):
+    """Pull ACS 5-year data for a given state."""
+    acs_vars = {
+        "median_age": "B01002_001E",
+        "median_income": "B19013_001E",
+
+        # Rent burden
+        "total_renter_households": "B25070_001E",
+        "rent_<15": "B25070_002E",
+        "rent_15_19": "B25070_003E",
+        "rent_20_24": "B25070_004E",
+        "rent_25_29": "B25070_005E",
+        "rent_30_34": "B25070_006E",
+        "rent_35_39": "B25070_007E",
+        "rent_40_49": "B25070_008E",
+        "rent_50_plus": "B25070_009E",
+
+        # Poverty
+        "poverty_universe": "B17001_001E",
+        "below_poverty": "B17001_002E",
+
+        # Vehicle availability
+        "total_households": "B08201_001E",
+        "no_vehicle": "B08201_002E",
+
+        # Tenure (renters vs owners)
+        "tenure_total": "B25003_001E",
+        "owner_occupied": "B25003_002E",
+        "renter_occupied": "B25003_003E",
+
+        # commute mode (B08301)
+        "total_workers": "B08301_001E",
+        "drove": "B08301_002E",
+        "public_transit_total": "B08301_010E",
+        "bus": "B08301_011E",
+        "subway": "B08301_012E",
+        "commuter_rail": "B08301_013E",  # long-distance train or commuter rail
+        "light_rail": "B08301_014E",  # long-distance train or commuter rail
+        "bike": "B08301_018E",
+        "walked": "B08301_019E",
+        "worked_home": "B08301_021E",
+
+        # Median gross rent
+        "median_rent": "B25064_001E",
+
+        # Units in structure (B25024)
+        "units_total": "B25024_001E",
+        "units_1_detached": "B25024_002E",
+        "units_1_attached": "B25024_003E",
+        "units_2": "B25024_004E",
+        "units_3_4": "B25024_005E",
+        "units_5_9": "B25024_006E",
+        "units_10_19": "B25024_007E",
+        "units_20_49": "B25024_008E",
+        "units_50_plus": "B25024_009E",
+        "units_mobile": "B25024_010E",
+        "units_other": "B25024_011E",
+
+        # vacancy rate (B25002)
+        "housing_units_total": "B25002_001E",
+        "housing_units_occupied": "B25002_002E",
+        "housing_units_vacant": "B25002_003E",
+
+        # race/ethnicity (B02001 & B03003)
+        "race_total": "B02001_001E",
+        "white": "B02001_002E",
+        "black": "B02001_003E",
+        "asian": "B02001_005E",
+        "hisp_total": "B03003_001E",
+        "hispanic": "B03003_003E",
+
+        # education (B15003)
+        "edu_total": "B15003_001E",
+        "bachelors": "B15003_022E",
+        "masters": "B15003_023E",
+        "professional": "B15003_024E",
+        "doctorate": "B15003_025E",
+
+        # Income inequality
+        "gini": "B19083_001E"
+    }
+
+    df = get_census(
+        dataset="acs/acs5",
+        variables=list(acs_vars.values()),
+        year=year,
+        params={"for": "tract:*", "in": f"state:{validate_state(state)}"},
+        guess_dtypes=True,
+        return_geoid=True
+    )
+
+    # rename
+    df = df.rename(columns={v: k for k, v in acs_vars.items()})
+    return df
+
+
+# ======================================================
+#  2. CREATE INDICATORS
+# ======================================================
+def compute_acs_indicators(df):
+    """Compute all ACS derived variables (rent burden, poverty, tenure, etc.)."""
+
+    # RENT BURDEN
+    df["rent_burdened_count"] = (
+        df["rent_30_34"] + df["rent_35_39"] +
+        df["rent_40_49"] + df["rent_50_plus"]
+    )
+    df["rent_burdened_pct"] = df["rent_burdened_count"] / df["total_renter_households"] * 100
+
+    # POVERTY
+    df["poverty_rate"] = df["below_poverty"] / df["poverty_universe"] * 100
+
+    # TENURE
+    df["pct_renters"] = df["renter_occupied"] / df["tenure_total"] * 100
+    df["pct_homeowners"] = df["owner_occupied"] / df["tenure_total"] * 100
+
+    # TRANSPORTATION
+    df["no_vehicle_pct"] = df["no_vehicle"] / df["total_households"] * 100
+    df["public_transit_pct"] = df["public_transit_total"] / df["total_workers"] * 100
+    df["drove_pct"] = df["drove"] / df["total_workers"] * 100
+    df["bike_pct"] = df["bike"] / df["total_workers"] * 100
+    df["walked_pct"] = df["walked"] / df["total_workers"] * 100
+    df["commuter_rail_pct"] = df["commuter_rail"] / df["total_workers"] * 100
+    df["light_rail_pct"] = df["light_rail"] / df["total_workers"] * 100
+    df["worked_home_pct"] = df["worked_home"] / df["total_workers"] * 100
+
+    # HOUSING STRUCTURE
+    df["single_family_units"] = df["units_1_detached"] + df["units_1_attached"]
+    df["small_multifamily_units"] = df["units_2"] + df["units_3_4"]
+    df["medium_multifamily_units"] = df["units_5_9"] + df["units_10_19"]
+    df["large_multifamily_units"] = df["units_20_49"] + df["units_50_plus"]
+    df["other_units"] = df["units_mobile"] + df["units_other"]
+
+    df["pct_single_family"] = df["single_family_units"] / df["units_total"] * 100
+    df["pct_small_multifamily"] = df["small_multifamily_units"] / df["units_total"] * 100
+    df["pct_medium_multifamily"] = df["medium_multifamily_units"] / df["units_total"] * 100
+    df["pct_large_multifamily"] = df["large_multifamily_units"] / df["units_total"] * 100
+    df["pct_other"] = df["other_units"] / df["units_total"] * 100
+
+    # VACANCY
+    df["vacancy_rate"] = df["housing_units_vacant"] / df["housing_units_total"] * 100
+
+    # RACE / ETHNICITY
+    df["pct_white"] = df["white"] / df["race_total"] * 100
+    df["pct_black"] = df["black"] / df["race_total"] * 100
+    df["pct_asian"] = df["asian"] / df["race_total"] * 100
+    df["pct_latino"] = df["hispanic"] / df["hisp_total"] * 100
+
+    # EDUCATION
+    df["college_plus"] = df["bachelors"] + df["masters"] + df["professional"] + df["doctorate"]
+    df["pct_college_plus"] = df["college_plus"] / df["edu_total"] * 100
+
+    return df
+
+
+# ======================================================
+#  3. TRACTS / PLACES
+# ======================================================
+def pull_tracts(state="CA", year=2022):
+    return tracts(state=state, cb=True, year=year, cache=True)
+
+
+def pull_places(state="CA", year=2022):
+    return places(state=state, cb=True, year=year, cache=True)
+
+
+# ======================================================
+#  4. SUBSET TRACTS TO A CITY
+# ======================================================
+def subset_city_tracts(tracts_gdf, places_gdf, city_name):
+    """Subset tracts whose *centroids* fall inside the named city."""
+    city = places_gdf[places_gdf["NAME"] == city_name]
+
+    tracts_copy = tracts_gdf.copy()
+    tracts_copy["centroid"] = tracts_copy.centroid
+
+    subset = gpd.sjoin(
+        tracts_copy.set_geometry("centroid"),
+        city,
+        predicate="within"
+    ).drop(columns="geometry")
+
+    # restore original geometry
+    subset = subset.set_geometry(tracts_gdf.geometry)
+    return subset
+
+
+# ======================================================
+#  5. MERGE TRACTS + ACS
+# ======================================================
+def merge_tracts_with_acs(tracts_city, acs_df):
+    return tracts_city.merge(
+        acs_df,
+        left_on="GEOID_left",
+        right_on="GEOID",
+        how="left"
+    )

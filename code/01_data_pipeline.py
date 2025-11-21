@@ -14,6 +14,7 @@
 import os
 
 from functions import (
+    # functions to load data
     load_parcels,
     load_zoning,
     load_railroad,
@@ -21,8 +22,17 @@ from functions import (
     load_bike_racks,
     load_affordable_housing,
     load_equity_index,
+    # functions for spatial join
     join_parcels_zoning,
-    save_parquet
+    # functions for saving
+    save_parquet,
+    # functions for census calculations
+    pull_acs_data,
+    compute_acs_indicators,
+    pull_tracts,
+    pull_places,
+    subset_city_tracts,
+    merge_tracts_with_acs
 )
 
 OUTPUT_DIR = "../output"
@@ -56,7 +66,32 @@ def run_etl():
     print("Saving outputs...")
     save_parquet(parcels_zoned, path=f"{OUTPUT_DIR}/parcels_with_zoning.parquet")    
     save_parquet(zoning, path=f"{OUTPUT_DIR}/zoning.parquet")
+    save_parquet(equity, path=f"{OUTPUT_DIR}/equity.parquet")
+    save_parquet(affordable, path=f"{OUTPUT_DIR}/affordable.parquet")
 
+    # ======================================================
+    #   ACS + TRACT GEOMETRY PIPELINE FOR SAN JOSE
+    # ======================================================
+    print("\nExtracting ACS and tract data...")
+
+    # Extract
+    acs_raw = pull_acs_data(state="CA", year=2022)
+    tracts = pull_tracts(state="CA", year=2022)
+    places = pull_places(state="CA", year=2022)
+
+    # Transform
+    print("Processing ACS indicators...")
+    acs = compute_acs_indicators(acs_raw)
+
+    print("Subsetting tracts to San Jose...")
+    san_jose_tracts = subset_city_tracts(tracts, places, city_name="San Jose")
+
+    print("Merging ACS with tract geometries...")
+    sj_acs = merge_tracts_with_acs(san_jose_tracts, acs)
+
+    # Load
+    print("Saving ACS outputs...")
+    save_parquet(sj_acs, path=f"{OUTPUT_DIR}/san_jose_tracts_with_acs.geoparquet")
 
 
     print("\nETL run complete.")

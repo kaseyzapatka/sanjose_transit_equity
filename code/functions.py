@@ -217,8 +217,11 @@ from pygris.data import get_census
 
 
 # ======================================================
-#  1. EXTRACT ACS
+#  CENSUS EXTRACTION
 # ======================================================
+#
+# 1. Get Census data
+# ----------------------------------------
 def pull_acs_data(state="CA", year=2022):
     """Pull ACS 5-year data for a given state."""
     acs_vars = {
@@ -315,9 +318,9 @@ def pull_acs_data(state="CA", year=2022):
     return df
 
 
-# ======================================================
-#  2. CREATE INDICATORS
-# ======================================================
+#
+# 2. Create indicators
+# ----------------------------------------
 def compute_acs_indicators(df):
     """Compute all ACS derived variables (rent burden, poverty, tenure, etc.)."""
 
@@ -373,10 +376,9 @@ def compute_acs_indicators(df):
 
     return df
 
-
-# ======================================================
-#  3. TRACTS / PLACES
-# ======================================================
+#
+# 3. Pull tracts and places
+# ----------------------------------------
 def pull_tracts(state="CA", year=2022):
     return tracts(state=state, cb=True, year=year, cache=True)
 
@@ -384,10 +386,9 @@ def pull_tracts(state="CA", year=2022):
 def pull_places(state="CA", year=2022):
     return places(state=state, cb=True, year=year, cache=True)
 
-
-# ======================================================
-#  4. SUBSET TRACTS TO A CITY
-# ======================================================
+#
+# 4. Subset tracts to a city
+# ----------------------------------------
 def subset_city_tracts(tracts_gdf, places_gdf, city_name):
     """Subset tracts whose *centroids* fall inside the named city."""
     city = places_gdf[places_gdf["NAME"] == city_name]
@@ -406,9 +407,10 @@ def subset_city_tracts(tracts_gdf, places_gdf, city_name):
     return subset
 
 
-# ======================================================
-#  5. MERGE TRACTS + ACS
-# ======================================================
+#
+# 5. Merge tracts and Census data
+# ----------------------------------------
+
 def merge_tracts_with_acs(tracts_city, acs_df):
     return tracts_city.merge(
         acs_df,
@@ -416,3 +418,115 @@ def merge_tracts_with_acs(tracts_city, acs_df):
         right_on="GEOID",
         how="left"
     )
+
+# ======================================================
+#  ZONING CLASSIFICATIONS
+# ======================================================
+
+#
+# Create classification dictionary
+# ----------------------------------------
+zoning_classification = {
+    # -------------------------
+    # RESIDENTIAL
+    # -------------------------
+    "R-1-1": "Residential",
+    "R-1-2": "Residential",
+    "R-1-5": "Residential",
+    "R-1-10": "Residential",
+    "R-1-8": "Residential",
+    "R-1-RR": "Residential",      # Rural Residential
+    "R-2": "Residential",
+    "R-M": "Residential",
+    "R-MH": "Residential",
+    "MS-C": "Residential",        # Mobilehome Subdistrict
+    "MS-G": "Residential",
+
+    # RESIDENTIAL PD / CL overlays
+    "R-2(PD)": "Residential",
+    "R-1-1(PD)": "Residential",
+    "R-1-2(PD)": "Residential",
+    "R-1-5(PD)": "Residential",
+    "R-1-5(CL)": "Residential",
+    "R-1-8(PD)": "Residential",
+    "R-1-8(CL)": "Residential",
+    "R-M(PD)": "Residential",
+    "R-M(CL)": "Residential",
+    
+    # -------------------------
+    # COMMERCIAL
+    # -------------------------
+    "C-1": "Commercial",
+    "C-2": "Commercial",
+    "CP": "Commercial",
+    "CN": "Commercial",
+    "CG": "Commercial",
+    "CR": "Commercial",
+    "CO": "Commercial",
+    "CIC": "Commercial",          # Commercial Industrial Combined
+    "TEC": "Commercial",          # Technology Park
+    "DC": "Commercial",           # Downtown Core commercial
+    "DC-NT1": "Commercial",       # Downtown Neighborhood Transition
+
+    # COMMERCIAL PD overlays
+    "CG(PD)": "Commercial",
+    "CN(PD)": "Commercial",
+    "CP(PD)": "Commercial",
+    "CIC(PD)": "Commercial",
+    "CO(PD)": "Commercial",
+    "DC(PD)": "Commercial",
+    "TEC(PD)": "Commercial",
+    "LI(PD)": "Industrial",
+    "HI(PD)": "Industrial",
+    "IP(PD)": "Industrial",
+    
+    # -------------------------
+    # INDUSTRIAL
+    # -------------------------
+    "LI": "Industrial",
+    "HI": "Industrial",
+    "IP": "Industrial",
+
+    # -------------------------
+    # MIXED USE / URBAN VILLAGE / TRANSIT
+    # -------------------------
+    "MUN": "Mixed Use",
+    "MUC": "Mixed Use",
+    "UV": "Mixed Use",
+    "UVC": "Mixed Use",
+    "UR": "Mixed Use",            # Urban Residential
+    "TR": "Mixed Use",            # Transit Residential
+
+    # Mixed Use PD overlays
+    "MUN(PD)": "Mixed Use",
+    "UR(PD)": "Mixed Use",
+
+    # -------------------------
+    # SPECIAL PURPOSE
+    # -------------------------
+    "OS": "Special Purpose",
+    "A": "Special Purpose",
+    "PQ": "Special Purpose",
+    "PQP": "Special Purpose",     # Public / Quasi-Public
+    "PF": "Special Purpose",
+    "PI": "Special Purpose",
+    "WATER": "Special Purpose",
+
+    # SPECIAL PURPOSE PD overlays
+    "OS(PD)": "Special Purpose",
+    "A(PD)": "Special Purpose",
+    "PQP(PD)": "Special Purpose",
+
+    # -------------------------
+    # CLEAN FILL FOR ANYTHING ELSE
+    # -------------------------
+    "OTHER": "Other"
+}
+
+#
+# Apply classification dictionary
+# ----------------------------------------
+def classify_zoning(code):
+    if pd.isna(code):
+        return "Unknown"
+    return zoning_classification.get(code.strip(), "Other")

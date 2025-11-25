@@ -420,6 +420,31 @@ def merge_tracts_with_acs(tracts_city, acs_df):
     )
 
 # ======================================================
+#  ZONING ABBREVIATIONS
+# ======================================================
+
+#
+# Create zoning abbreviation dictionary
+# ----------------------------------------
+zoning_abb = {
+    "UV": "Urban Village",
+    "UVC": "Urban Village Commercial",
+    "UR": "Urban Residential",
+    "TR": "Transit Residential",
+    "MU": "Mixed Use",
+    "MUC": "Mixed Use Commercial",
+    "MUN": "Municipal/Neighborhood Mixed Use",
+}
+
+#
+# Apply classification dictionary
+# ----------------------------------------
+def abbreviate_zoning(code):
+    if pd.isna(code):
+        return "Unknown"
+    return zoning_abb.get(code.strip(), "Other")
+
+# ======================================================
 #  ZONING CLASSIFICATIONS
 # ======================================================
 

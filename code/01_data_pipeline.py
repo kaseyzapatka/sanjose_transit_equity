@@ -34,6 +34,7 @@ from functions import (
     subset_city_tracts,
     merge_tracts_with_acs, 
     # functions for zoning
+    abbreviate_zoning,
     zoning_classification, 
     classify_zoning
 )
@@ -89,6 +90,8 @@ def run_etl():
     # Process zoning data
     # ----------------------------------------
     print("Processing zoning data...")
+    # rewrite zoning abbreviations to be clearer for analysis
+    parcels_zoned["zoning"] = parcels_zoned["ZONING"].apply(abbreviate_zoning)
     # create a new zoning classification variable in parcels data
     parcels_zoned["zoning_class"] = parcels_zoned["ZONING"].apply(classify_zoning)
     # create indicator of planned zoning

@@ -17,9 +17,9 @@ from functions import (
     # functions to load data
     load_parcels,
     load_zoning,
-    load_railroad,
-    load_bikeways,
-    load_bike_racks,
+    #load_railroad,
+    #load_bikeways,
+    #load_bike_racks,
     load_affordable_housing,
     load_equity_index,
     # functions for spatial join
@@ -43,6 +43,7 @@ from functions import (
 # Settings
 # ----------------------------------------
 OUTPUT_DIR = "../output"
+DATA_DIR = "../data/"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 
@@ -64,9 +65,9 @@ def run_etl():
     # extract San Jose spatial data
     parcels = load_parcels()
     zoning = load_zoning()
-    railroad = load_railroad()
-    bikeways = load_bikeways()
-    bikeracks = load_bike_racks()
+    #railroad = load_railroad()
+    #bikeways = load_bikeways()
+    #bikeracks = load_bike_racks()
     affordable = load_affordable_housing()
     equity = load_equity_index()
 
@@ -118,11 +119,11 @@ def run_etl():
     #        LOAD
     # ======================
     print("Saving necessary outputs...")
-    save_parquet(parcels_zoned, path=f"{OUTPUT_DIR}/parcels_with_zoning.parquet")    
-    save_parquet(zoning, path=f"{OUTPUT_DIR}/zoning.parquet")
-    save_parquet(equity, path=f"{OUTPUT_DIR}/equity.parquet")
-    save_parquet(affordable, path=f"{OUTPUT_DIR}/affordable.parquet")
-    save_parquet(sj_acs, path=f"{OUTPUT_DIR}/san_jose_tracts_with_acs.geoparquet")
+    save_parquet(parcels_zoned, path=f"{DATA_DIR}/processed/parcels_with_zoning.parquet")    
+    save_parquet(zoning, path=f"{DATA_DIR}/processed/zoning.parquet")
+    save_parquet(equity, path=f"{DATA_DIR}/processed/equity.parquet")
+    save_parquet(affordable, path=f"{DATA_DIR}/processed/affordable.parquet")
+    save_parquet(sj_acs, path=f"{DATA_DIR}/processed/san_jose_tracts_with_acs.geoparquet")
 
 
 # run pipeline

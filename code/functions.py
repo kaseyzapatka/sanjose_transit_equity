@@ -28,26 +28,26 @@ from pygris.data import get_census
 # EXTRACT FUNCTIONS
 # ==========================================================================
 
-def load_parcels(path="../data/Parcels/Parcels.shp"):
+def load_parcels(path="../data/raw/Parcels/Parcels.shp"):
     return gpd.read_file(path)
 
-def load_zoning(path="../data/Zoning_Districts/Zoning_Districts.shp"):
+def load_zoning(path="../data/raw/Zoning_Districts/Zoning_Districts.shp"):
     return gpd.read_file(path)
 
-def load_railroad(path="../data/Railroad/Railroad.shp"):
-    rr = gpd.read_file(path)
-    return rr.query("NAME != 'Union Pacific'")
+#def load_railroad(path="../data/Railroad/Railroad.shp"):
+#    rr = gpd.read_file(path)
+#    return rr.query("NAME != 'Union Pacific'")
 
-def load_bikeways(path="../data/Bikeways/Bikeways.shp"):
+#def load_bikeways(path="../data/Bikeways/Bikeways.shp"):
+#    return gpd.read_file(path)
+
+#def load_bike_racks(path="../data/Bike_Racks/Bike_Racks.shp"):
+#    return gpd.read_file(path)
+
+def load_affordable_housing(path="../data/raw/Affordable_Rental_Housing/Affordable_Rental_Housing.shp"):
     return gpd.read_file(path)
 
-def load_bike_racks(path="../data/Bike_Racks/Bike_Racks.shp"):
-    return gpd.read_file(path)
-
-def load_affordable_housing(path="../data/Affordable_Rental_Housing/Affordable_Rental_Housing.shp"):
-    return gpd.read_file(path)
-
-def load_equity_index(path="../data/Equity_Index_Census_Tracts/Equity_Index_Census_Tracts.shp"):
+def load_equity_index(path="../data/raw/Equity_Index_Census_Tracts/Equity_Index_Census_Tracts.shp"):
     return gpd.read_file(path)
 
 
@@ -158,7 +158,7 @@ def choropleth_map(
     k=5,                                    # number of classes
     cmap="Blues",                           # color scheme
     save=False,                             # save figure
-    filename="../output/choropleth_map.pdf", # file name
+    filename="../output/maps/choropleth_map.pdf", # file name
     notes=None                              # notes
 ):    
     # ensure consistent CRS

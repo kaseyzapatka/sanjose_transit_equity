@@ -269,20 +269,23 @@ def create_maps(parcels, tracts, output_dir):
         framealpha=0.95
     )
     # Create footnote with parcel counts
-    footnote_lines = ["Parcel counts by zoning type:"]
-    total_parcels = 0
+    total_parcels_within_1mile = len(parcels_within_1mile)
+
+    footnote_lines = ["Share of urban-zoned parcels within 1 mile of San Jose Dirdon Station (count):"]
     for zone_type in urban_zoning:
         count = len(uz_within_1mile[uz_within_1mile["zoning"] == zone_type])
         if count > 0:
-            footnote_lines.append(f"  {zone_type}: {count:,} parcels")
-            total_parcels += count
-    footnote_lines.append(f"  Total: {total_parcels:,} urban-zoned parcels")
-    
+            share = count / total_parcels_within_1mile * 100
+            footnote_lines.append(f"  {zone_type}: {share:.1f}% ({count:,} parcels)")
+
+    # Add total parcels within 1 mile
+    footnote_lines.append(f"Total parcels: {total_parcels_within_1mile:,}")
+
     footnote_text = "\n".join(footnote_lines)
-    fig.text(0.12, 0.02, footnote_text, ha='left', va='bottom', 
-             fontsize=8, 
-             bbox=dict(boxstyle='round', facecolor='white', alpha=0.5))
-    
+    fig.text(
+        0.12, 0.02, footnote_text,
+        ha='left', va='bottom', fontsize=8,
+    )
     ax.axis('off')
     
     # 7. Save the map

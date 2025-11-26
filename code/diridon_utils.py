@@ -263,7 +263,7 @@ def create_maps(parcels, tracts, output_dir):
     ax.legend(
         handles=legend_handles,
         loc="upper right",
-        title="Legend",
+        title="",
         title_fontsize=10,
         fontsize=9,
         framealpha=0.95

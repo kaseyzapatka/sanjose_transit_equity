@@ -15,6 +15,7 @@ import geopandas as gpd
 import pandas as pd
 from shapely.geometry import Point
 import matplotlib.pyplot as plt
+from matplotlib.patches import Patch
 
 # ---------------------------------------------
 # Configuration
@@ -28,8 +29,8 @@ MILE_IN_METERS = 1609.344
 # Step 1: Load Data
 # ---------------------------------------------
 
-def load_data(parcels_path="../output/parcels_with_zoning.parquet", 
-              tracts_path="../output/san_jose_tracts_with_acs.geoparquet"):
+def load_data(parcels_path="../data/processed/parcels_with_zoning.parquet", 
+              tracts_path="../data/processed/san_jose_tracts_with_acs.geoparquet"):
     parcels = gpd.read_parquet(parcels_path)
     tracts = gpd.read_parquet(tracts_path)
     return parcels, tracts
@@ -168,20 +169,20 @@ def create_maps(parcels, tracts, output_dir):
     )
     
     # 5. Identify urban-zoned parcels within 1 mile and assign colors
-    urban_zoning = ["UV", "UVC", "UR", "TR", "MU", "MUC", "MUN"]
-    uv_within_1mile = parcels_within_1mile[
-        parcels_within_1mile["ZONING"].isin(urban_zoning)
+    urban_zoning = ["Urban Village", "Urban Village Commercial", "Urban Residential", "Transit Residential", "Mixed Use", "Mixed Use Commercial", "Municipal/Neighborhood Mixed Use"]
+    uz_within_1mile = parcels_within_1mile[
+        parcels_within_1mile["zoning"].isin(urban_zoning)
     ].copy()
     
     # Define color scheme for each zoning type
     zoning_colors = {
-        "UV": "#e41a1c",      # Red
-        "UVC": "#377eb8",     # Blue
-        "UR": "#4daf4a",      # Green
-        "TR": "#984ea3",      # Purple
-        "MU": "#ff7f00",      # Orange
-        "MUC": "#ffff33",     # Yellow
-        "MUN": "#a65628"      # Brown
+        "Urban Village": "#e41a1c",                    # Red
+        "Urban Village Commercial": "#377eb8",         # Blue
+        "Urban Residential": "#4daf4a",                # Green
+        "Transit Residential": "#984ea3",              # Purple
+        "Mixed Use": "#ff7f00",                        # Orange
+        "Mixed Use Commercial": "#ffff33",             # Yellow
+        "Municipal/Neighborhood Mixed Use": "#a65628"  # Brown
     }
     
     # 6. Create the map
@@ -192,15 +193,15 @@ def create_maps(parcels, tracts, output_dir):
     
     # Add 2-mile buffer boundary (context)
     gpd.GeoDataFrame(geometry=buffer_2mile, crs=parcels_proj.crs).boundary.plot(
-        ax=ax, color="black", linestyle="--", linewidth=0.5, label="2-mile radius"
+        ax=ax, color="grey", linestyle="--", linewidth=0.5, label="2-mile radius"
     )
     
     # Add parcel base map (within 2-mile area)
     parcels_within_2mile.plot(ax=ax, color="lightgrey", edgecolor="white", linewidth=0.1)
     
-        # Plot each zoning type with its own color
+    # Plot each zoning type with its own color
     for zone_type in urban_zoning:
-        zone_parcels = uv_within_1mile[uv_within_1mile["ZONING"] == zone_type]
+        zone_parcels = uz_within_1mile[uz_within_1mile["zoning"] == zone_type]
         if len(zone_parcels) > 0:
             zone_parcels.plot(
                 ax=ax, 
@@ -213,7 +214,7 @@ def create_maps(parcels, tracts, output_dir):
     
     # Add 1-mile buffer boundary
     gpd.GeoDataFrame(geometry=buffer_1mile, crs=parcels_proj.crs).boundary.plot(
-        ax=ax, color="black", linestyle="--", linewidth=2, label="1-mile radius"
+        ax=ax, color="black", linestyle="--", linewidth=1, label="1-mile radius"
     )
     
     # Add station marker
@@ -231,9 +232,57 @@ def create_maps(parcels, tracts, output_dir):
     # Format
     ax.set_title(
         "Urban-zoned parcels within 1 mile of San Jose Diridon Station", 
-        fontsize=14, fontweight="bold"
+        fontsize=14, fontweight="bold", pad=20
     )
-    ax.legend(loc="upper right", fontsize=9, framealpha=0.9)
+    
+    # Create custom legend handles
+    legend_handles = [
+        Patch(facecolor=zoning_colors[z], edgecolor="black", label=f"{z}")
+        for z in urban_zoning
+        if z in uz_within_1mile["zoning"].unique()
+    ]
+
+    # Add buffer + station handles manually
+    legend_handles.extend([
+        Patch(facecolor="none", edgecolor="black", linestyle="--", label="1-mile radius"),
+        Patch(facecolor="none", edgecolor="grey", linestyle="--", label="2-mile radius"),
+    ])
+
+    # Add station marker
+    station_handle = plt.Line2D(
+        [0], [0],
+        marker=".",
+        color="black",
+        markersize=12,
+        linestyle="None",
+        label="Diridon Station"
+    )
+    legend_handles.append(station_handle)
+
+    # Now use manual legend
+    ax.legend(
+        handles=legend_handles,
+        loc="upper right",
+        title="Legend",
+        title_fontsize=10,
+        fontsize=9,
+        framealpha=0.95
+    )
+    # Create footnote with parcel counts
+    footnote_lines = ["Parcel counts by zoning type:"]
+    total_parcels = 0
+    for zone_type in urban_zoning:
+        count = len(uz_within_1mile[uz_within_1mile["zoning"] == zone_type])
+        if count > 0:
+            footnote_lines.append(f"  {zone_type}: {count:,} parcels")
+            total_parcels += count
+    footnote_lines.append(f"  Total: {total_parcels:,} urban-zoned parcels")
+    
+    footnote_text = "\n".join(footnote_lines)
+    fig.text(0.12, 0.02, footnote_text, ha='left', va='bottom', 
+             fontsize=8, 
+             bbox=dict(boxstyle='round', facecolor='white', alpha=0.5))
+    
     ax.axis('off')
     
     # 7. Save the map
@@ -244,7 +293,7 @@ def create_maps(parcels, tracts, output_dir):
     print(f"✓ Map saved to: {outpath}")
     print(f"✓ Zoning breakdown:")
     for zone_type in urban_zoning:
-        count = len(uv_within_1mile[uv_within_1mile["ZONING"] == zone_type])
+        count = len(uz_within_1mile[uz_within_1mile["zoning"] == zone_type])
         if count > 0:
             print(f"  - {zone_type}: {count} parcels")
     

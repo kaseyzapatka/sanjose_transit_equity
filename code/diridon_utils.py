@@ -146,7 +146,7 @@ def create_maps(parcels, tracts, output_dir):
     
     # 2. Use the constant for Diridon Station coordinates
     diridon_station = gpd.GeoDataFrame(
-        geometry=[Point(*DIRIDON_LON_LAT)],  # Use constant
+        geometry=[Point(*DIRIDON_LON_LAT)],  # ✅ Use constant
         crs="EPSG:4326"
     ).to_crs(epsg=3857)
     
@@ -167,46 +167,73 @@ def create_maps(parcels, tracts, output_dir):
         how="intersection"
     )
     
-    # 5. Identify urban-zoned parcels within 1 mile
+    # 5. Identify urban-zoned parcels within 1 mile and assign colors
     urban_zoning = ["UV", "UVC", "UR", "TR", "MU", "MUC", "MUN"]
     uv_within_1mile = parcels_within_1mile[
         parcels_within_1mile["ZONING"].isin(urban_zoning)
-    ]
+    ].copy()
+    
+    # Define color scheme for each zoning type
+    zoning_colors = {
+        "UV": "#e41a1c",      # Red
+        "UVC": "#377eb8",     # Blue
+        "UR": "#4daf4a",      # Green
+        "TR": "#984ea3",      # Purple
+        "MU": "#ff7f00",      # Orange
+        "MUC": "#ffff33",     # Yellow
+        "MUN": "#a65628"      # Brown
+    }
     
     # 6. Create the map
-    fig, ax = plt.subplots(figsize=(12, 12))
+    fig, ax = plt.subplots(figsize=(14, 12))
     
     # Add census tracts as background context
-    tracts_proj.plot(ax=ax, color="lightyellow", edgecolor="grey", alpha=0.3)
+    tracts_proj.plot(ax=ax, color="lightgrey", edgecolor="grey", alpha=0.3)
     
     # Add 2-mile buffer boundary (context)
     gpd.GeoDataFrame(geometry=buffer_2mile, crs=parcels_proj.crs).boundary.plot(
-        ax=ax, color="green", linestyle=":", linewidth=1.5, label="2-mile radius"
+        ax=ax, color="black", linestyle="--", linewidth=0.5, label="2-mile radius"
     )
     
     # Add parcel base map (within 2-mile area)
     parcels_within_2mile.plot(ax=ax, color="lightgrey", edgecolor="white", linewidth=0.1)
     
-    # Highlight urban-zoned parcels within 1 mile
-    uv_within_1mile.plot(ax=ax, color="red", alpha=0.7, edgecolor="darkred", linewidth=0.2)
+        # Plot each zoning type with its own color
+    for zone_type in urban_zoning:
+        zone_parcels = uv_within_1mile[uv_within_1mile["ZONING"] == zone_type]
+        if len(zone_parcels) > 0:
+            zone_parcels.plot(
+                ax=ax, 
+                color=zoning_colors[zone_type], 
+                alpha=0.7, 
+                edgecolor="black", 
+                linewidth=0.2,
+                label=f"{zone_type} ({len(zone_parcels)} parcels)"
+            )
     
     # Add 1-mile buffer boundary
     gpd.GeoDataFrame(geometry=buffer_1mile, crs=parcels_proj.crs).boundary.plot(
-        ax=ax, color="blue", linestyle="--", linewidth=2, label="1-mile radius"
+        ax=ax, color="black", linestyle="--", linewidth=2, label="1-mile radius"
     )
     
     # Add station marker
     diridon_station.plot(
-        ax=ax, color="black", marker="*", markersize=300, 
+        ax=ax, color="black", marker=".", markersize=200, 
         label="Diridon Station", zorder=10
     )
+    
+    # Set the map extent to 2-mile buffer bounds (with small padding)
+    buffer_2m_bounds = gpd.GeoDataFrame(geometry=buffer_2mile, crs=parcels_proj.crs).total_bounds
+    padding = MILE_IN_METERS * 0.1  # 10% padding
+    ax.set_xlim(buffer_2m_bounds[0] - padding, buffer_2m_bounds[2] + padding)
+    ax.set_ylim(buffer_2m_bounds[1] - padding, buffer_2m_bounds[3] + padding)
     
     # Format
     ax.set_title(
         "Urban-zoned parcels within 1 mile of San Jose Diridon Station", 
         fontsize=14, fontweight="bold"
     )
-    ax.legend(loc="upper right", fontsize=10)
+    ax.legend(loc="upper right", fontsize=9, framealpha=0.9)
     ax.axis('off')
     
     # 7. Save the map
@@ -215,6 +242,12 @@ def create_maps(parcels, tracts, output_dir):
     plt.close()
     
     print(f"✓ Map saved to: {outpath}")
+    print(f"✓ Zoning breakdown:")
+    for zone_type in urban_zoning:
+        count = len(uv_within_1mile[uv_within_1mile["ZONING"] == zone_type])
+        if count > 0:
+            print(f"  - {zone_type}: {count} parcels")
+    
     return outpath
 
 

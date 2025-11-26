@@ -16,6 +16,8 @@ import pandas as pd
 from shapely.geometry import Point
 import matplotlib.pyplot as plt
 from matplotlib.patches import Patch
+import folium
+from folium.features import GeoJsonTooltip
 
 # ---------------------------------------------
 # Configuration
@@ -302,6 +304,143 @@ def create_maps(parcels, tracts, output_dir):
     
     return outpath
 
+# ---------------------------------------------
+# Step 7: Interactive Map 
+# ---------------------------------------------
+# ---------------------------------------------
+# Step 7: Interactive Map 
+# ---------------------------------------------
+import folium
+from folium.features import GeoJsonTooltip
+from pathlib import Path
+import json
+
+def create_interactive_map(parcels, tracts, output_dir):
+    """
+    Create an interactive map of parcels and tracts near Diridon Station
+    with 1-mile and 2-mile buffers and urban zoning highlighted.
+
+    Parameters
+    ----------
+    parcels : GeoDataFrame
+        Parcel geometries and zoning info.
+    tracts : GeoDataFrame
+        Census tract geometries.
+    output_dir : str or Path
+        Directory to save the HTML map.
+
+    Returns
+    -------
+    Path
+        Path to saved HTML map file.
+    """
+    # Reproject to EPSG:4326 (required by Folium)
+    parcels_proj = parcels.to_crs(epsg=3857)
+    tracts_proj = tracts.to_crs(epsg=3857)
+
+    # Diridon Station coordinates
+    diridon_station_coords = DIRIDON_LON_LAT  # (lon, lat)
+
+    # Create base map centered on Diridon Station
+    m = folium.Map(
+        location=[diridon_station_coords[1], diridon_station_coords[0]],
+        zoom_start=14,
+        tiles="CartoDB positron"
+    )
+
+    # ------------------------
+    # Add tracts as background
+    # ------------------------
+    tracts_clean = tracts_proj[["geometry"]].copy()  # only geometry column
+    folium.GeoJson(
+        json.loads(tracts_clean.to_json()),
+        style_function=lambda x: {
+            "fillColor": "lightgrey",
+            "color": "grey",
+            "weight": 0.5,
+            "fillOpacity": 0.2,
+        },
+        name="Census Tracts"
+    ).add_to(m)
+
+    # ------------------------
+    # Add 1-mile and 2-mile buffers
+    # ------------------------
+    folium.Circle(
+        location=[diridon_station_coords[1], diridon_station_coords[0]],
+        radius=MILE_IN_METERS,
+        color="black",
+        weight=2,
+        fill=False,
+        popup="1-mile radius"
+    ).add_to(m)
+
+    folium.Circle(
+        location=[diridon_station_coords[1], diridon_station_coords[0]],
+        radius=2 * MILE_IN_METERS,
+        color="grey",
+        weight=1,
+        fill=False,
+        popup="2-mile radius"
+    ).add_to(m)
+
+    # ------------------------
+    # Urban zoning parcels
+    # ------------------------
+    zoning_colors = {
+        "Urban Village": "#e41a1c",
+        "Urban Village Commercial": "#377eb8",
+        "Urban Residential": "#4daf4a",
+        "Transit Residential": "#984ea3",
+        "Mixed Use": "#ff7f00",
+        "Mixed Use Commercial": "#ffff33",
+        "Municipal/Neighborhood Mixed Use": "#a65628"
+    }
+    urban_zoning = list(zoning_colors.keys())
+    uz_within_1mile = parcels_proj[parcels_proj["zoning"].isin(urban_zoning)].copy()
+
+    # Add parcels by zoning type
+    for zone_type, color in zoning_colors.items():
+        subset = uz_within_1mile[uz_within_1mile["zoning"] == zone_type]
+        if not subset.empty:
+            subset_clean = subset[["geometry", "zoning"]].copy()  # keep only serializable columns
+            folium.GeoJson(
+                json.loads(subset_clean.to_json()),
+                style_function=lambda x, c=color: {
+                    "fillColor": c,
+                    "color": "black",
+                    "weight": 0.3,
+                    "fillOpacity": 0.7
+                },
+                tooltip=GeoJsonTooltip(
+                    fields=["zoning"],
+                    aliases=["Zoning type:"],
+                    localize=True
+                ),
+                name=f"{zone_type} ({len(subset_clean)} parcels)"
+            ).add_to(m)
+
+    # ------------------------
+    # Add Diridon Station marker
+    # ------------------------
+    folium.Marker(
+        location=[diridon_station_coords[1], diridon_station_coords[0]],
+        popup="Diridon Station",
+        icon=folium.Icon(color="black", icon="info-sign")
+    ).add_to(m)
+
+    # ------------------------
+    # Layer control and save
+    # ------------------------
+    folium.LayerControl(collapsed=False).add_to(m)
+
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    outpath = output_dir / "diridon_interactive_map.html"
+    m.save(outpath)
+
+    print(f"✓ Interactive map saved to: {outpath}")
+    return outpath
 
 # ---------------------------------------------
 # Step 7: Export Outputs

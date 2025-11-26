@@ -33,7 +33,6 @@ def load_data(parcels_path="../output/parcels_with_zoning.parquet",
     parcels = gpd.read_parquet(parcels_path)
     tracts = gpd.read_parquet(tracts_path)
     return parcels, tracts
-    
 
 
 # ---------------------------------------------
@@ -41,6 +40,9 @@ def load_data(parcels_path="../output/parcels_with_zoning.parquet",
 # ---------------------------------------------
 
 def reproject_for_buffering(parcels, tracts):
+    """
+    Reproject parcels and tracts to EPSG:3857 for accurate distance calculations.
+    """
     target_crs = "EPSG:3857"
     return parcels.to_crs(target_crs), tracts.to_crs(target_crs)
 
@@ -50,6 +52,10 @@ def reproject_for_buffering(parcels, tracts):
 # ---------------------------------------------
 
 def build_diridon_buffers():
+    """
+    Create 1-mile and 2-mile buffers around Diridon Station.
+    Returns buffers in EPSG:3857 (meters) for analysis.
+    """
     pt = gpd.GeoSeries([Point(*DIRIDON_LON_LAT)], crs="EPSG:4326")
     pt_m = pt.to_crs("EPSG:3857").iloc[0]
     buffer_1m = pt_m.buffer(1 * MILE_IN_METERS)
@@ -62,10 +68,21 @@ def build_diridon_buffers():
 # ---------------------------------------------
 
 def summarize_parcels(parcels_m, buffer_1m):
+    """
+    Summarize parcels within 1-mile buffer.
+    
+    Parameters:
+    -----------
+    parcels_m : GeoDataFrame in EPSG:3857
+    buffer_1m : Polygon geometry in EPSG:3857
+    """
+    parcels_m = parcels_m.copy()
     parcels_m["centroid"] = parcels_m.geometry.centroid
     centroids = parcels_m.set_geometry("centroid")
 
-    within_1m = centroids[centroids.centroid.within(buffer_1m)]
+    within_1m = centroids[centroids.centroid.within(buffer_1m)].copy()
+    within_1m = within_1m.set_geometry("geometry")  # Reset to original geometry
+    
     uv = within_1m[within_1m["zoning_class"] == "Urban Village"]
 
     summary = {
@@ -81,6 +98,16 @@ def summarize_parcels(parcels_m, buffer_1m):
 # ---------------------------------------------
 
 def summarize_acs(tracts_m, buffer_2m, acs_cols):
+    """
+    Summarize ACS data for tracts within 2-mile buffer.
+    
+    Parameters:
+    -----------
+    tracts_m : GeoDataFrame in EPSG:3857
+    buffer_2m : Polygon geometry in EPSG:3857
+    acs_cols : dict mapping labels to column names
+    """
+    tracts_m = tracts_m.copy()
     tracts_m["in_buffer"] = tracts_m.geometry.intersects(buffer_2m)
     tracts_sel = tracts_m[tracts_m["in_buffer"]].copy()
 
@@ -102,12 +129,9 @@ def create_maps(parcels, tracts, output_dir):
     
     Parameters:
     -----------
-    parcels : GeoDataFrame
-        Parcels with zoning information
-    tracts : GeoDataFrame
-        Census tracts with ACS data
+    parcels : GeoDataFrame (any CRS - will be reprojected)
+    tracts : GeoDataFrame (any CRS - will be reprojected)
     output_dir : str or Path
-        Directory to save output map file
     
     Returns:
     --------
@@ -116,18 +140,19 @@ def create_maps(parcels, tracts, output_dir):
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     
-    # 1. Ensure everything in projected CRS (meters)
+    # 1. Reproject everything to EPSG:3857 for consistent analysis
     parcels_proj = parcels.to_crs(epsg=3857)
+    tracts_proj = tracts.to_crs(epsg=3857)
     
-    # 2. Diridon Station coordinates (lon, lat in WGS84)
+    # 2. Use the constant for Diridon Station coordinates
     diridon_station = gpd.GeoDataFrame(
-        geometry=[Point(-121.9028, 37.3292)],
+        geometry=[Point(*DIRIDON_LON_LAT)],  # Use constant
         crs="EPSG:4326"
     ).to_crs(epsg=3857)
     
-    # 3. Create buffers
-    buffer_1mile = diridon_station.buffer(1609.34)   # 1 mile in meters
-    buffer_2mile = diridon_station.buffer(2 * 1609.34)  # 2 miles in meters
+    # 3. Create buffers (in meters)
+    buffer_1mile = diridon_station.buffer(MILE_IN_METERS)
+    buffer_2mile = diridon_station.buffer(2 * MILE_IN_METERS)
     
     # 4. Subset parcels within buffers
     parcels_within_2mile = gpd.overlay(
@@ -144,17 +169,26 @@ def create_maps(parcels, tracts, output_dir):
     
     # 5. Identify urban-zoned parcels within 1 mile
     urban_zoning = ["UV", "UVC", "UR", "TR", "MU", "MUC", "MUN"]
-    uv_within_1mile = parcels_within_1mile[parcels_within_1mile["ZONING"].isin(urban_zoning)]
-
+    uv_within_1mile = parcels_within_1mile[
+        parcels_within_1mile["ZONING"].isin(urban_zoning)
+    ]
     
     # 6. Create the map
-    fig, ax = plt.subplots(figsize=(10, 10))
+    fig, ax = plt.subplots(figsize=(12, 12))
     
-    # Add parcel base map (zoomed into 2-mile area)
-    parcels_within_2mile.plot(ax=ax, color="lightgrey", edgecolor="white")
+    # Add census tracts as background context
+    tracts_proj.plot(ax=ax, color="lightyellow", edgecolor="grey", alpha=0.3)
+    
+    # Add 2-mile buffer boundary (context)
+    gpd.GeoDataFrame(geometry=buffer_2mile, crs=parcels_proj.crs).boundary.plot(
+        ax=ax, color="green", linestyle=":", linewidth=1.5, label="2-mile radius"
+    )
+    
+    # Add parcel base map (within 2-mile area)
+    parcels_within_2mile.plot(ax=ax, color="lightgrey", edgecolor="white", linewidth=0.1)
     
     # Highlight urban-zoned parcels within 1 mile
-    uv_within_1mile.plot(ax=ax, color="red", alpha=0.7)
+    uv_within_1mile.plot(ax=ax, color="red", alpha=0.7, edgecolor="darkred", linewidth=0.2)
     
     # Add 1-mile buffer boundary
     gpd.GeoDataFrame(geometry=buffer_1mile, crs=parcels_proj.crs).boundary.plot(
@@ -162,11 +196,17 @@ def create_maps(parcels, tracts, output_dir):
     )
     
     # Add station marker
-    diridon_station.plot(ax=ax, color="black", marker=".", markersize=100, label="Diridon Station")
+    diridon_station.plot(
+        ax=ax, color="black", marker="*", markersize=300, 
+        label="Diridon Station", zorder=10
+    )
     
     # Format
-    ax.set_title("Urban-zoned, mixed use parcels within 1 mile of San Jose Diridon Station", fontsize=14)
-    ax.legend()
+    ax.set_title(
+        "Urban-zoned parcels within 1 mile of San Jose Diridon Station", 
+        fontsize=14, fontweight="bold"
+    )
+    ax.legend(loc="upper right", fontsize=10)
     ax.axis('off')
     
     # 7. Save the map
@@ -174,6 +214,7 @@ def create_maps(parcels, tracts, output_dir):
     plt.savefig(outpath, dpi=150, bbox_inches='tight')
     plt.close()
     
+    print(f"✓ Map saved to: {outpath}")
     return outpath
 
 
@@ -182,20 +223,41 @@ def create_maps(parcels, tracts, output_dir):
 # ---------------------------------------------
 
 def export_outputs(within_1m, uv, tracts_sel, acs_summary, output_dir):
+    """
+    Export analysis results to files.
+    
+    Note: Data will be saved in EPSG:3857. Convert back to EPSG:4326 
+    before final export if needed for compatibility.
+    """
     output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    # Convert back to EPSG:4326 for storage/sharing
+    within_1m_geo = within_1m.to_crs("EPSG:4326")
+    uv_geo = uv.to_crs("EPSG:4326")
+    tracts_sel_geo = tracts_sel.to_crs("EPSG:4326")
 
     p1 = output_dir / "diridon_parcels_1mile.parquet"
-    within_1m.to_parquet(p1)
+    within_1m_geo.to_parquet(p1)
 
     p2 = output_dir / "diridon_uv_parcels_1mile.parquet"
-    uv.to_parquet(p2)
+    uv_geo.to_parquet(p2)
+
+    p3 = output_dir / "diridon_tracts_2mile.parquet"
+    tracts_sel_geo.to_parquet(p3)
 
     acs_df = pd.DataFrame([acs_summary])
     acs_out = output_dir / "diridon_acs_2mile_summary.csv"
     acs_df.to_csv(acs_out, index=False)
 
+    print(f"✓ Exported {len(within_1m)} parcels within 1 mile")
+    print(f"✓ Exported {len(uv)} Urban Village parcels within 1 mile")
+    print(f"✓ Exported {len(tracts_sel)} census tracts within 2 miles")
+    print(f"✓ Exported ACS summary statistics")
+
     return {
         "parcels_1m": p1,
         "uv_1m": p2,
+        "tracts_2m": p3,
         "acs_summary": acs_out
     }

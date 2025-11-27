@@ -32,10 +32,12 @@ MILE_IN_METERS = 1609.344
 # ---------------------------------------------
 
 def load_data(parcels_path="../data/processed/parcels_with_zoning.parquet", 
-              tracts_path="../data/processed/san_jose_tracts_with_acs.geoparquet"):
+              tracts_path="../data/processed/san_jose_tracts_with_acs.geoparquet",
+              parcels_tracts_path="../data/processed/parcels_with_zoning_and_tract_data.parquet"):
     parcels = gpd.read_parquet(parcels_path)
     tracts = gpd.read_parquet(tracts_path)
-    return parcels, tracts
+    parcels_tracts = gpd.read_parquet(parcels_tracts_path)
+    return parcels, tracts , parcels_tracts
 
 
 # ---------------------------------------------
@@ -324,24 +326,22 @@ def create_maps(parcels, tracts, output_dir):
     return outpath
 
 # ---------------------------------------------
-# Step 7: Interactive Map 
+# Step 7: Interactive Map
 # ---------------------------------------------
 import folium
 from folium.features import GeoJsonTooltip
 from pathlib import Path
 import json
 
-def create_interactive_map(parcels, tracts, output_dir):
+def create_interactive_map(parcels_with_tract_data, tracts, output_dir):
     """
-    Create an interactive map of parcels and tracts near Diridon Station
-    with 1-mile and 2-mile buffers and urban zoning highlighted.
+    Create an interactive map of parcels near Diridon Station, showing zoning and
+    tract-level ACS variables for each parcel.
 
     Parameters
     ----------
-    parcels : GeoDataFrame
-        Parcel geometries and zoning info.
-    tracts : GeoDataFrame
-        Census tract geometries.
+    parcels_with_tract_data : GeoDataFrame
+        Parcel geometries with zoning info and attached tract-level ACS variables.
     output_dir : str or Path
         Directory to save the HTML map.
 
@@ -350,8 +350,9 @@ def create_interactive_map(parcels, tracts, output_dir):
     Path
         Path to saved HTML map file.
     """
+
     # Reproject to EPSG:4326 (required by Folium)
-    parcels_proj = parcels.to_crs(epsg=4326)
+    parcels_proj = parcels_with_tract_data.to_crs(epsg=4326)
     tracts_proj = tracts.to_crs(epsg=4326)
 
     # Diridon Station coordinates
@@ -371,7 +372,7 @@ def create_interactive_map(parcels, tracts, output_dir):
     folium.GeoJson(
         json.loads(tracts_clean.to_json()),
         style_function=lambda x: {
-            "fillColor": "lightgrey",
+            "fillColor": "lightblue",
             "color": "grey",
             "weight": 0.5,
             "fillOpacity": 0.2,
@@ -401,7 +402,7 @@ def create_interactive_map(parcels, tracts, output_dir):
     ).add_to(m)
 
     # ------------------------
-    # Urban zoning parcels
+    # Urban zoning parcels with tract data in tooltip
     # ------------------------
     zoning_colors = {
         "Urban Village": "#e41a1c",
@@ -412,14 +413,32 @@ def create_interactive_map(parcels, tracts, output_dir):
         "Mixed Use Commercial": "#ffff33",
         "Municipal/Neighborhood Mixed Use": "#a65628"
     }
+
     urban_zoning = list(zoning_colors.keys())
-    uz_within_1mile = parcels_proj[parcels_proj["zoning"].isin(urban_zoning)].copy()
+    parcels_uv = parcels_proj[parcels_proj["zoning"].isin(urban_zoning)].copy()
+
+    # Fields from tract-level data to show in popup
+    tract_fields = [
+        "vacancy_rate",
+        "median_rent",
+        "pct_white",
+        "pct_black",
+        "pct_asian",
+        "pct_latino",
+        "pct_college_plus"
+    ]
 
     # Add parcels by zoning type
     for zone_type, color in zoning_colors.items():
-        subset = uz_within_1mile[uz_within_1mile["zoning"] == zone_type]
+        subset = parcels_uv[parcels_uv["zoning"] == zone_type]
         if not subset.empty:
-            subset_clean = subset[["geometry", "zoning"]].copy()  # keep only serializable columns
+            # Keep only serializable columns
+            subset_clean = subset[["geometry", "zoning"] + [f for f in tract_fields if f in subset.columns]].copy()
+            
+            # Tooltip fields: zoning + ACS tract fields
+            tooltip_fields = ["zoning"] + [f for f in tract_fields if f in subset_clean.columns]
+            aliases = ["Zoning type:"] + [f.replace("_", " ").title() for f in tract_fields]
+
             folium.GeoJson(
                 json.loads(subset_clean.to_json()),
                 style_function=lambda x, c=color: {
@@ -429,8 +448,8 @@ def create_interactive_map(parcels, tracts, output_dir):
                     "fillOpacity": 0.7
                 },
                 tooltip=GeoJsonTooltip(
-                    fields=["zoning"],
-                    aliases=["Zoning type:"],
+                    fields=tooltip_fields,
+                    aliases=aliases,
                     localize=True
                 ),
                 name=f"{zone_type} ({len(subset_clean)} parcels)"
@@ -457,6 +476,7 @@ def create_interactive_map(parcels, tracts, output_dir):
 
     print(f"✓ Interactive map saved to: {outpath}")
     return outpath
+
 
 # ---------------------------------------------
 # Step 8: Export Outputs

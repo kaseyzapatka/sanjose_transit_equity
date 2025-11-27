@@ -28,26 +28,26 @@ from pygris.data import get_census
 # EXTRACT FUNCTIONS
 # ==========================================================================
 
-def load_parcels(path="../data/Parcels/Parcels.shp"):
+def load_parcels(path="../data/raw/Parcels/Parcels.shp"):
     return gpd.read_file(path)
 
-def load_zoning(path="../data/Zoning_Districts/Zoning_Districts.shp"):
+def load_zoning(path="../data/raw/Zoning_Districts/Zoning_Districts.shp"):
     return gpd.read_file(path)
 
-def load_railroad(path="../data/Railroad/Railroad.shp"):
-    rr = gpd.read_file(path)
-    return rr.query("NAME != 'Union Pacific'")
+#def load_railroad(path="../data/Railroad/Railroad.shp"):
+#    rr = gpd.read_file(path)
+#    return rr.query("NAME != 'Union Pacific'")
 
-def load_bikeways(path="../data/Bikeways/Bikeways.shp"):
+#def load_bikeways(path="../data/Bikeways/Bikeways.shp"):
+#    return gpd.read_file(path)
+
+#def load_bike_racks(path="../data/Bike_Racks/Bike_Racks.shp"):
+#    return gpd.read_file(path)
+
+def load_affordable_housing(path="../data/raw/Affordable_Rental_Housing/Affordable_Rental_Housing.shp"):
     return gpd.read_file(path)
 
-def load_bike_racks(path="../data/Bike_Racks/Bike_Racks.shp"):
-    return gpd.read_file(path)
-
-def load_affordable_housing(path="../data/Affordable_Rental_Housing/Affordable_Rental_Housing.shp"):
-    return gpd.read_file(path)
-
-def load_equity_index(path="../data/Equity_Index_Census_Tracts/Equity_Index_Census_Tracts.shp"):
+def load_equity_index(path="../data/raw/Equity_Index_Census_Tracts/Equity_Index_Census_Tracts.shp"):
     return gpd.read_file(path)
 
 
@@ -78,6 +78,49 @@ def join_parcels_zoning(parcels, zoning):
 
     return cleaned
 
+def attach_tract_data_to_parcels(parcels_gdf, tracts_gdf, tract_fields=None):
+    """
+    Spatially join parcels to census tracts, attaching selected tract-level fields
+    to each parcel. Ensures GEOID is always included and correctly named.
+    """
+    import geopandas as gpd
+
+    if tract_fields is None:
+        tract_fields = [
+            "vacancy_rate",
+            "median_rent",
+            "pct_white",
+            "pct_black",
+            "pct_asian",
+            "pct_latino",
+            "pct_college_plus"
+        ]
+
+    # Ensure CRS match
+    if parcels_gdf.crs != tracts_gdf.crs:
+        tracts_gdf = tracts_gdf.to_crs(parcels_gdf.crs)
+
+    # Keep only requested columns + GEOID
+    fields_to_keep = ["GEOID"] + [f for f in tract_fields if f in tracts_gdf.columns]
+    tracts_subset = tracts_gdf[["geometry"] + fields_to_keep].copy()
+
+    # Spatial join
+    parcels_with_tract_data = gpd.sjoin(
+        parcels_gdf.set_geometry("geometry"),
+        tracts_subset.set_geometry("geometry"),
+        how="left",
+        predicate="within"
+    )
+
+    # Drop extra geometry column and rename GEOID
+    parcels_with_tract_data = parcels_with_tract_data.drop(columns=["index_right"], errors="ignore")
+    
+    # If GEOID got a suffix, rename to plain 'GEOID'
+    for col in parcels_with_tract_data.columns:
+        if col.endswith("_right") and col.startswith("GEOID"):
+            parcels_with_tract_data = parcels_with_tract_data.rename(columns={col: "GEOID"})
+
+    return parcels_with_tract_data
 
 
 # ==========================================================================
@@ -158,7 +201,7 @@ def choropleth_map(
     k=5,                                    # number of classes
     cmap="Blues",                           # color scheme
     save=False,                             # save figure
-    filename="../output/choropleth_map.pdf", # file name
+    filename="../output/maps/choropleth_map.pdf", # file name
     notes=None                              # notes
 ):    
     # ensure consistent CRS

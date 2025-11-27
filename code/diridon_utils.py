@@ -421,8 +421,13 @@ def create_interactive_map(parcels_with_tract_data, tracts, output_dir):
 
     # Fields from tract-level data to show in popup
     tract_fields = [
+        "public_transit_pct",
+        "walked_pct",
+        "drove_pct",
+        "pct_renters",
         "vacancy_rate",
         "median_rent",
+        "median_income",
         "pct_white",
         "pct_black",
         "pct_asian",
@@ -441,8 +446,20 @@ def create_interactive_map(parcels_with_tract_data, tracts, output_dir):
             ].copy()
             
             # Tooltip fields: zoning + ACS tract fields + parcel + tract ID
-            tooltip_fields = ["PARCELID", "GEOID", "zoning"] + [f for f in tract_fields if f in subset_clean.columns]
-            aliases = ["Parcel ID:", "Tract GEOID:", "Zoning type:"] + [f.replace("_", " ").title() for f in tract_fields]
+            # Columns to show in tooltip (only include columns that exist in subset_clean)
+            tooltip_fields = [col for col in ["PARCELID", "GEOID", "zoning"] + tract_fields if col in subset_clean.columns]
+
+            # Aliases must match exactly
+            aliases = []
+            for col in tooltip_fields:
+                if col == "PARCELID":
+                    aliases.append("Parcel ID:")
+                elif col == "GEOID":
+                    aliases.append("Tract GEOID:")
+                elif col == "zoning":
+                    aliases.append("Zoning type:")
+                else:
+                    aliases.append(col.replace("_", " ").title())
 
             folium.GeoJson(
                 json.loads(subset_clean.to_json()),

@@ -129,7 +129,7 @@ def run_etl():
         "pct_latino",
         "pct_college_plus"
     ]
-    parcels_with_tract_data = attach_tract_data_to_parcels(parcels_zoned, sj_acs, tract_fields=tract_fields)
+    parcels_with_tract_data = attach_tract_data_to_parcels(parcels_zoned, sj_acs, tract_fields=None) # change this
     
     
     # ======================

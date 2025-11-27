@@ -87,8 +87,13 @@ def attach_tract_data_to_parcels(parcels_gdf, tracts_gdf, tract_fields=None):
 
     if tract_fields is None:
         tract_fields = [
+            "public_transit_pct",
+            "walked_pct",
+            "drove_pct",
+            "pct_renters",
             "vacancy_rate",
             "median_rent",
+            "median_income",
             "pct_white",
             "pct_black",
             "pct_asian",

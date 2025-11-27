@@ -24,6 +24,7 @@ from functions import (
     load_equity_index,
     # functions for spatial join
     join_parcels_zoning,
+    attach_tract_data_to_parcels,
     # functions for saving
     save_parquet,
     # functions for census calculations
@@ -113,6 +114,22 @@ def run_etl():
     # 3. Merge tracts to just San Jose
     print("3. Merging ACS with tract geometries...")
     sj_acs = merge_tracts_with_acs(san_jose_tracts, acs)
+
+
+    #
+    # Attach tract-level ACS data to parcels
+    # ----------------------------------------
+    print("Attaching tract-level ACS data to parcels...")
+    tract_fields = [
+        "vacancy_rate",
+        "median_rent",
+        "pct_white",
+        "pct_black",
+        "pct_asian",
+        "pct_latino",
+        "pct_college_plus"
+    ]
+    parcels_with_tract_data = attach_tract_data_to_parcels(parcels_zoned, sj_acs, tract_fields=tract_fields)
     
     
     # ======================
@@ -124,6 +141,7 @@ def run_etl():
     save_parquet(equity, path=f"{DATA_DIR}/processed/equity.parquet")
     save_parquet(affordable, path=f"{DATA_DIR}/processed/affordable.parquet")
     save_parquet(sj_acs, path=f"{DATA_DIR}/processed/san_jose_tracts_with_acs.geoparquet")
+    save_parquet(parcels_with_tract_data, path=f"{DATA_DIR}/processed/parcels_with_zoning_and_tract_data.parquet")
 
 
 # run pipeline

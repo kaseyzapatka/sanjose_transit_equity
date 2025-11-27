@@ -79,6 +79,59 @@ def join_parcels_zoning(parcels, zoning):
     return cleaned
 
 
+def attach_tract_data_to_parcels(parcels_gdf, tracts_gdf, tract_fields=None):
+    """
+    Spatially join parcels to census tracts, attaching selected tract-level fields
+    to each parcel.
+
+    Parameters
+    ----------
+    parcels_gdf : GeoDataFrame
+        Parcel geometries with zoning info.
+    tracts_gdf : GeoDataFrame
+        Tract geometries with ACS variables.
+    tract_fields : list of str, optional
+        Names of tract-level columns to attach. Defaults to standard ACS vars.
+    
+    Returns
+    -------
+    GeoDataFrame
+        Parcels with tract-level attributes attached.
+    """
+    import geopandas as gpd
+
+    if tract_fields is None:
+        tract_fields = [
+            "vacancy_rate",
+            "median_rent",
+            "pct_white",
+            "pct_black",
+            "pct_asian",
+            "pct_latino",
+            "pct_college_plus"
+        ]
+    
+    # Ensure same CRS
+    if parcels_gdf.crs != tracts_gdf.crs:
+        tracts_gdf = tracts_gdf.to_crs(parcels_gdf.crs)
+
+    # Keep only geometry + requested fields
+    tracts_subset = tracts_gdf[["geometry"] + [f for f in tract_fields if f in tracts_gdf.columns]].copy()
+
+    # Spatial join parcels -> tracts
+    parcels_with_tract_data = gpd.sjoin(
+        parcels_gdf.set_geometry("geometry"),
+        tracts_subset.set_geometry("geometry"),
+        how="left",
+        predicate="within"
+    )
+
+    # Drop extra geometry column from sjoin
+    parcels_with_tract_data = parcels_with_tract_data.drop(columns=["index_right"], errors="ignore")
+
+    return parcels_with_tract_data
+
+
 
 # ==========================================================================
 # LOAD FUNCTIONS

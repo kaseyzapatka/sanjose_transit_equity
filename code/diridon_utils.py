@@ -123,190 +123,206 @@ def summarize_acs(tracts_m, buffer_2m, acs_cols):
 
 
 # ---------------------------------------------
-# Step 6: Maps
+# Step 6: Maps (EPSG:4326 + EPSG:3857 for buffers)
 # ---------------------------------------------
 
 def create_maps(parcels, tracts, output_dir):
     """
-    Create map of parcels and tracts near Diridon Station with 1-mile and 2-mile buffers.
-    
+    Create static map of parcels and zoning near Diridon Station
+    with accurate 1-mile and 2-mile buffers.
+
+    ALL DATA IS PLOTTED IN EPSG:4326 (to match folium),
+    but buffers are created in EPSG:3857 to ensure accurate distance.
+
     Parameters:
     -----------
-    parcels : GeoDataFrame (any CRS - will be reprojected)
-    tracts : GeoDataFrame (any CRS - will be reprojected)
+    parcels : GeoDataFrame
+    tracts : GeoDataFrame
     output_dir : str or Path
-    
+
     Returns:
     --------
-    Path : path to saved map file
+    Path : path to saved PNG map file
     """
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
-    
-    # 1. Reproject everything to EPSG:3857 for consistent analysis
-    parcels_proj = parcels.to_crs(epsg=3857)
-    tracts_proj = tracts.to_crs(epsg=3857)
-    
-    # 2. Use the constant for Diridon Station coordinates
-    diridon_station = gpd.GeoDataFrame(
-        geometry=[Point(*DIRIDON_LON_LAT)],  # ✅ Use constant
+
+    # ---------------------------------------------------------
+    # 1. Reproject parcels + tracts to EPSG:4326 for consistent plotting
+    # ---------------------------------------------------------
+    parcels_4326 = parcels.to_crs(4326)
+    tracts_4326 = tracts.to_crs(4326)
+
+    # ---------------------------------------------------------
+    # 2. Create Diridon Station point (4326 -> 3857)
+    # ---------------------------------------------------------
+    diridon_station_4326 = gpd.GeoDataFrame(
+        geometry=[Point(*DIRIDON_LON_LAT)],
         crs="EPSG:4326"
-    ).to_crs(epsg=3857)
-    
-    # 3. Create buffers (in meters)
-    buffer_1mile = diridon_station.buffer(MILE_IN_METERS)
-    buffer_2mile = diridon_station.buffer(2 * MILE_IN_METERS)
-    
-    # 4. Subset parcels within buffers
+    )
+
+    # Convert to EPSG:3857 for accurate buffer geometry
+    diridon_station_3857 = diridon_station_4326.to_crs(3857)
+
+    # ---------------------------------------------------------
+    # 3. Create 1-mile and 2-mile buffers in meters (EPSG:3857)
+    # ---------------------------------------------------------
+    buffer_1mile_3857 = diridon_station_3857.buffer(MILE_IN_METERS)
+    buffer_2mile_3857 = diridon_station_3857.buffer(2 * MILE_IN_METERS)
+
+    # Convert buffers back to 4326 for overlay + plotting
+    buffer_1mile_4326 = gpd.GeoDataFrame(geometry=buffer_1mile_3857, crs=3857).to_crs(4326)
+    buffer_2mile_4326 = gpd.GeoDataFrame(geometry=buffer_2mile_3857, crs=3857).to_crs(4326)
+
+    # ---------------------------------------------------------
+    # 4. Subset parcels within buffers (now everything matches in 4326)
+    # ---------------------------------------------------------
     parcels_within_2mile = gpd.overlay(
-        parcels_proj, 
-        gpd.GeoDataFrame(geometry=buffer_2mile, crs=parcels_proj.crs), 
+        parcels_4326,
+        buffer_2mile_4326,
         how="intersection"
     )
-    
+
     parcels_within_1mile = gpd.overlay(
-        parcels_proj, 
-        gpd.GeoDataFrame(geometry=buffer_1mile, crs=parcels_proj.crs), 
+        parcels_4326,
+        buffer_1mile_4326,
         how="intersection"
     )
-    
-    # 5. Identify urban-zoned parcels within 1 mile and assign colors
-    urban_zoning = ["Urban Village", "Urban Village Commercial", "Urban Residential", "Transit Residential", "Mixed Use", "Mixed Use Commercial", "Municipal/Neighborhood Mixed Use"]
+
+    # ---------------------------------------------------------
+    # 5. Identify urban-zoned parcels + define colors
+    # ---------------------------------------------------------
+    urban_zoning = [
+        "Urban Village", "Urban Village Commercial", "Urban Residential",
+        "Transit Residential", "Mixed Use", "Mixed Use Commercial",
+        "Municipal/Neighborhood Mixed Use"
+    ]
+
     uz_within_1mile = parcels_within_1mile[
         parcels_within_1mile["zoning"].isin(urban_zoning)
     ].copy()
-    
-    # Define color scheme for each zoning type
+
     zoning_colors = {
-        "Urban Village": "#e41a1c",                    # Red
-        "Urban Village Commercial": "#377eb8",         # Blue
-        "Urban Residential": "#4daf4a",                # Green
-        "Transit Residential": "#984ea3",              # Purple
-        "Mixed Use": "#ff7f00",                        # Orange
-        "Mixed Use Commercial": "#ffff33",             # Yellow
-        "Municipal/Neighborhood Mixed Use": "#a65628"  # Brown
+        "Urban Village": "#e41a1c",
+        "Urban Village Commercial": "#377eb8",
+        "Urban Residential": "#4daf4a",
+        "Transit Residential": "#984ea3",
+        "Mixed Use": "#ff7f00",
+        "Mixed Use Commercial": "#ffff33",
+        "Municipal/Neighborhood Mixed Use": "#a65628"
     }
-    
-    # 6. Create the map
+
+    # ---------------------------------------------------------
+    # 6. Build the figure
+    # ---------------------------------------------------------
     fig, ax = plt.subplots(figsize=(14, 12))
-    
-    # Add census tracts as background context
-    tracts_proj.plot(ax=ax, color="lightgrey", edgecolor="grey", alpha=0.3)
-    
-    # Add 2-mile buffer boundary (context)
-    gpd.GeoDataFrame(geometry=buffer_2mile, crs=parcels_proj.crs).boundary.plot(
+
+    # Tracts background
+    tracts_4326.plot(ax=ax, color="lightgrey", edgecolor="grey", alpha=0.3)
+
+    # 2-mile buffer
+    buffer_2mile_4326.boundary.plot(
         ax=ax, color="grey", linestyle="--", linewidth=0.5, label="2-mile radius"
     )
-    
-    # Add parcel base map (within 2-mile area)
-    parcels_within_2mile.plot(ax=ax, color="lightgrey", edgecolor="white", linewidth=0.1)
-    
-    # Plot each zoning type with its own color
+
+    # Base parcels (within 2 miles)
+    parcels_within_2mile.plot(
+        ax=ax, color="lightgrey", edgecolor="white", linewidth=0.1
+    )
+
+    # Urban zoning colors
     for zone_type in urban_zoning:
-        zone_parcels = uz_within_1mile[uz_within_1mile["zoning"] == zone_type]
-        if len(zone_parcels) > 0:
-            zone_parcels.plot(
-                ax=ax, 
-                color=zoning_colors[zone_type], 
-                alpha=0.7, 
-                edgecolor="black", 
+        zp = uz_within_1mile[uz_within_1mile["zoning"] == zone_type]
+        if len(zp) > 0:
+            zp.plot(
+                ax=ax,
+                color=zoning_colors[zone_type],
+                alpha=0.7,
+                edgecolor="black",
                 linewidth=0.2,
-                label=f"{zone_type} ({len(zone_parcels)} parcels)"
+                label=f"{zone_type} ({len(zp)} parcels)"
             )
-    
-    # Add 1-mile buffer boundary
-    gpd.GeoDataFrame(geometry=buffer_1mile, crs=parcels_proj.crs).boundary.plot(
+
+    # 1-mile buffer
+    buffer_1mile_4326.boundary.plot(
         ax=ax, color="black", linestyle="--", linewidth=1, label="1-mile radius"
     )
-    
-    # Add station marker
-    diridon_station.plot(
-        ax=ax, color="black", marker=".", markersize=200, 
-        label="Diridon Station", zorder=10
+
+    # Station point
+    diridon_station_4326.plot(
+        ax=ax,
+        color="black",
+        marker=".",
+        markersize=200,
+        label="Diridon Station",
+        zorder=10
     )
-    
-    # Set the map extent to 2-mile buffer bounds (with small padding)
-    buffer_2m_bounds = gpd.GeoDataFrame(geometry=buffer_2mile, crs=parcels_proj.crs).total_bounds
-    padding = MILE_IN_METERS * 0.1  # 10% padding
-    ax.set_xlim(buffer_2m_bounds[0] - padding, buffer_2m_bounds[2] + padding)
-    ax.set_ylim(buffer_2m_bounds[1] - padding, buffer_2m_bounds[3] + padding)
-    
-    # Format
+
+    # ---------------------------------------------------------
+    # Set extent to 2-mile buffer
+    # ---------------------------------------------------------
+    xmin, ymin, xmax, ymax = buffer_2mile_4326.total_bounds
+    pad = 0.01  # small lat/lon padding
+    ax.set_xlim(xmin - pad, xmax + pad)
+    ax.set_ylim(ymin - pad, ymax + pad)
+
+    # ---------------------------------------------------------
+    # Title + legend
+    # ---------------------------------------------------------
     ax.set_title(
-        "Urban-zoned parcels within 1 mile of San Jose Diridon Station", 
+        "Urban-zoned parcels within 1 mile of San Jose Diridon Station",
         fontsize=14, fontweight="bold", pad=20
     )
-    
-    # Create custom legend handles
-    legend_handles = [
-        Patch(facecolor=zoning_colors[z], edgecolor="black", label=f"{z}")
-        for z in urban_zoning
-        if z in uz_within_1mile["zoning"].unique()
-    ]
 
-    # Add buffer + station handles manually
+    # Custom legend
+    legend_handles = [
+        Patch(facecolor=zoning_colors[z], edgecolor="black", label=z)
+        for z in uz_within_1mile["zoning"].unique()
+    ]
     legend_handles.extend([
         Patch(facecolor="none", edgecolor="black", linestyle="--", label="1-mile radius"),
         Patch(facecolor="none", edgecolor="grey", linestyle="--", label="2-mile radius"),
     ])
-
-    # Add station marker
-    station_handle = plt.Line2D(
-        [0], [0],
-        marker=".",
-        color="black",
-        markersize=12,
-        linestyle="None",
-        label="Diridon Station"
+    legend_handles.append(
+        plt.Line2D([0], [0], marker=".", color="black", markersize=12,
+                   linestyle="None", label="Diridon Station")
     )
-    legend_handles.append(station_handle)
 
-    # Now use manual legend
-    ax.legend(
-        handles=legend_handles,
-        loc="upper right",
-        title="",
-        title_fontsize=10,
-        fontsize=9,
-        framealpha=0.95
-    )
-    # Create footnote with parcel counts
-    total_parcels_within_1mile = len(parcels_within_1mile)
+    ax.legend(handles=legend_handles, loc="upper right", fontsize=9, framealpha=0.95)
+    ax.axis("off")
 
-    footnote_lines = ["Share of urban-zoned parcels within 1 mile of San Jose Dirdon Station (count):"]
-    for zone_type in urban_zoning:
-        count = len(uz_within_1mile[uz_within_1mile["zoning"] == zone_type])
+    # ---------------------------------------------------------
+    # Footnote with parcel counts
+    # ---------------------------------------------------------
+    total = len(parcels_within_1mile)
+    footnote_lines = [
+        "Share of urban-zoned parcels within 1 mile of San Jose Diridon Station:"
+    ]
+    for z in urban_zoning:
+        count = len(uz_within_1mile[uz_within_1mile["zoning"] == z])
         if count > 0:
-            share = count / total_parcels_within_1mile * 100
-            footnote_lines.append(f"  {zone_type}: {share:.1f}% ({count:,} parcels)")
+            pct = (count / total) * 100
+            footnote_lines.append(f"  {z}: {pct:.1f}% ({count:,} parcels)")
+    footnote_lines.append(f"Total parcels: {total:,}")
 
-    # Add total parcels within 1 mile
-    footnote_lines.append(f"Total parcels: {total_parcels_within_1mile:,}")
+    fig.text(0.12, 0.02, "\n".join(footnote_lines), fontsize=8, ha="left")
 
-    footnote_text = "\n".join(footnote_lines)
-    fig.text(
-        0.12, 0.02, footnote_text,
-        ha='left', va='bottom', fontsize=8,
-    )
-    ax.axis('off')
-    
-    # 7. Save the map
-    outpath = output_dir / "diridon_buffer_map.png"
-    plt.savefig(outpath, dpi=150, bbox_inches='tight')
+    # ---------------------------------------------------------
+    # Save
+    # ---------------------------------------------------------
+    outpath =  Path(output_dir) / "diridon_buffer_map.pdf"
+    plt.savefig(outpath, dpi=150, bbox_inches="tight")
     plt.close()
-    
+
     print(f"✓ Map saved to: {outpath}")
-    print(f"✓ Zoning breakdown:")
-    for zone_type in urban_zoning:
-        count = len(uz_within_1mile[uz_within_1mile["zoning"] == zone_type])
-        if count > 0:
-            print(f"  - {zone_type}: {count} parcels")
-    
+    print("✓ Zoning breakdown:")
+    for z in urban_zoning:
+        c = len(uz_within_1mile[uz_within_1mile["zoning"] == z])
+        if c > 0:
+            print(f"  - {z}: {c} parcels")
+
     return outpath
 
-# ---------------------------------------------
-# Step 7: Interactive Map 
-# ---------------------------------------------
 # ---------------------------------------------
 # Step 7: Interactive Map 
 # ---------------------------------------------
@@ -335,8 +351,8 @@ def create_interactive_map(parcels, tracts, output_dir):
         Path to saved HTML map file.
     """
     # Reproject to EPSG:4326 (required by Folium)
-    parcels_proj = parcels.to_crs(epsg=3857)
-    tracts_proj = tracts.to_crs(epsg=3857)
+    parcels_proj = parcels.to_crs(epsg=4326)
+    tracts_proj = tracts.to_crs(epsg=4326)
 
     # Diridon Station coordinates
     diridon_station_coords = DIRIDON_LON_LAT  # (lon, lat)
@@ -443,7 +459,7 @@ def create_interactive_map(parcels, tracts, output_dir):
     return outpath
 
 # ---------------------------------------------
-# Step 7: Export Outputs
+# Step 8: Export Outputs
 # ---------------------------------------------
 
 def export_outputs(within_1m, uv, tracts_sel, acs_summary, output_dir):

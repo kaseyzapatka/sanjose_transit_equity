@@ -336,12 +336,14 @@ import json
 def create_interactive_map(parcels_with_tract_data, tracts, output_dir):
     """
     Create an interactive map of parcels near Diridon Station, showing zoning and
-    tract-level ACS variables for each parcel.
+    tract-level ACS variables for each parcel, including parcel ID and tract ID.
 
     Parameters
     ----------
     parcels_with_tract_data : GeoDataFrame
         Parcel geometries with zoning info and attached tract-level ACS variables.
+    tracts : GeoDataFrame
+        Census tract geometries.
     output_dir : str or Path
         Directory to save the HTML map.
 
@@ -433,11 +435,14 @@ def create_interactive_map(parcels_with_tract_data, tracts, output_dir):
         subset = parcels_uv[parcels_uv["zoning"] == zone_type]
         if not subset.empty:
             # Keep only serializable columns
-            subset_clean = subset[["geometry", "zoning"] + [f for f in tract_fields if f in subset.columns]].copy()
+            subset_clean = subset[
+                ["geometry", "PARCELID", "GEOID", "zoning"] + 
+                [f for f in tract_fields if f in subset.columns]
+            ].copy()
             
-            # Tooltip fields: zoning + ACS tract fields
-            tooltip_fields = ["zoning"] + [f for f in tract_fields if f in subset_clean.columns]
-            aliases = ["Zoning type:"] + [f.replace("_", " ").title() for f in tract_fields]
+            # Tooltip fields: zoning + ACS tract fields + parcel + tract ID
+            tooltip_fields = ["PARCELID", "GEOID", "zoning"] + [f for f in tract_fields if f in subset_clean.columns]
+            aliases = ["Parcel ID:", "Tract GEOID:", "Zoning type:"] + [f.replace("_", " ").title() for f in tract_fields]
 
             folium.GeoJson(
                 json.loads(subset_clean.to_json()),

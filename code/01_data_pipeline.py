@@ -121,15 +121,20 @@ def run_etl():
     # ----------------------------------------
     print("Attaching tract-level ACS data to parcels...")
     tract_fields = [
+        "public_transit_pct",
+        "walked_pct",
+        "drove_pct",
+        "pct_renters",
         "vacancy_rate",
         "median_rent",
+        "median_income",
         "pct_white",
         "pct_black",
         "pct_asian",
         "pct_latino",
         "pct_college_plus"
     ]
-    parcels_with_tract_data = attach_tract_data_to_parcels(parcels_zoned, sj_acs, tract_fields=tract_fields)
+    parcels_with_tract_data = attach_tract_data_to_parcels(parcels_zoned, sj_acs, tract_fields=None) # change this
     
     
     # ======================

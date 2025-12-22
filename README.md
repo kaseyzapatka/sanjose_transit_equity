@@ -11,6 +11,7 @@ I created a virtual environment specifically for this exercise. You can recreate
 - [Parcel shapefiles](https://data.sanjoseca.gov/dataset/parcels/resource/3e23d2d0-e07d-4d13-addd-608cc3221bd5). 
 - [Zoning shapefiles](https://data.sanjoseca.gov/dataset/zoning-districts/resource/3e2aacc3-f608-483e-85c6-f1be7e1e4995). 
 - San Jose City [zoning codes](https://library.municode.com/ca/san_jose/codes/code_of_ordinances?nodeId=TIT20ZO_CH20.10GEPRZODI_20.10.060ZODIES)
+- Permit data on active, expired, and permits under inspection [was found here](https://data.sanjoseca.gov/organization/planning-building-code-enforcement)
 
 ## Data
 Since GitHub has data limitations, all data used for this project can be accessed [here](https://drive.google.com/drive/folders/1rM17LTuIoiBh7mqlefV8dIxEGZeKY9fc?usp=sharing). 

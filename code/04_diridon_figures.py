@@ -1,5 +1,5 @@
 # ==========================================================================
-# diridon_figures.py — Phase 3 static figures for the Diridon memo.
+# 04_diridon_figures.py — Phase 3 static figures for the Diridon memo.
 #
 # Reads the pre-computed layers/tables from diridon_capacity.py and
 # diridon_equity.py and renders three minimalist figures:

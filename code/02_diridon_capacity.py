@@ -1,9 +1,9 @@
 # ==========================================================================
-# diridon_capacity.py
+# 02_diridon_capacity.py
 #
 # Phase 1 — Parcel-level housing capacity within 1 mile of Diridon Station.
 #
-# Replaces the placeholder density table in 01_zoning_capacity.ipynb with:
+# Replaces the original placeholder density analysis with:
 #   1. REAL maximum densities from San Jose Municipal Code Title 20
 #      (Ch. 20.55, Table 20-136) plus the Downtown / Diridon Station Area
 #      Plan (DSAP) designation for Downtown (DC) parcels.

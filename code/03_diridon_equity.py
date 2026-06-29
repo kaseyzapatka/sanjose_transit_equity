@@ -1,5 +1,5 @@
 # ==========================================================================
-# diridon_equity.py
+# 03_diridon_equity.py
 #
 # Phase 2 — Who lives in the Diridon station area now, and where new housing
 # capacity overlaps displacement-vulnerable neighborhoods.

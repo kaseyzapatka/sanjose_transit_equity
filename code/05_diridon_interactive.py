@@ -1,5 +1,5 @@
 # ==========================================================================
-# diridon_interactive.py — Phase 3 interactive hero map (Leaflet via folium).
+# 05_diridon_interactive.py — Phase 3 interactive hero map (Leaflet via folium).
 #
 # Same story as the static hero map, but explorable: vulnerability tracts
 # shaded underneath, capacity parcels on top (soft sites in coral), each parcel

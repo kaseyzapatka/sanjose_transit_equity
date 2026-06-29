@@ -1,0 +1,43 @@
+project:
+  type: website
+  output-dir: docs
+  render:
+    - "index.qmd"
+    - "map.qmd"
+    - "methods.qmd"
+  post-render:
+    - scripts/render_pdfs.sh
+  resources:
+    - "output/maps/diridon_interactive_map.html"
+
+website:
+  title: "Diridon Capacity & Equity"
+  site-url: "https://www.kaseyzapatka.com/sanjose_transit_equity"
+  navbar:
+    pinned: true
+    left:
+      - text: "Memo"
+        href: index.qmd
+      - text: "Interactive Map"
+        href: map.qmd
+      - text: "Methods & Sources"
+        href: methods.qmd
+    right:
+      - text: "Download PDF"
+        href: diridon_capacity_equity_memo.pdf
+      - icon: github
+        href: https://github.com/kaseyzapatka/sanjose_transit_equity
+  page-footer:
+    center: "Kasey Zapatka · Housing capacity & equity around Diridon Station · 2026"
+
+format:
+  html:
+    theme: cosmo
+    toc: true
+    toc-location: left
+    embed-resources: true
+    fig-align: center
+    code-tools: false
+    grid:
+      sidebar-width: 240px
+      body-width: 820px

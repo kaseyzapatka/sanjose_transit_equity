@@ -1,0 +1,6 @@
+coverage_threshold,soft_parcels,softsite_capacity,dc_softsite_capacity,mixeduse_softsite_capacity
+0.05,242,29455,27902,1553
+0.1,260,31245,29613,1632
+0.15,274,34586,32776,1810
+0.2,292,41486,39549,1937
+0.25,319,44415,42178,2237

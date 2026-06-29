@@ -1,0 +1,27 @@
+---
+title: "Interactive station-area map"
+format:
+  html:
+    page-layout: full
+    toc: false
+---
+
+Explore the 1-mile Diridon station area parcel by parcel. **Tracts** are shaded
+by displacement-vulnerability score (renter share, rent burden, transit
+dependence, and the City's Equity Index). **Parcels** that permit housing sit on
+top — **coral** marks *soft sites* (underbuilt, high-capacity lots where new
+homes can realistically go); grey marks already-built capacity parcels. Hover
+any feature for its zoning, capacity, footprint coverage, and neighborhood
+context. Toggle layers at top-right.
+
+```{=html}
+<iframe src="output/maps/diridon_interactive_map.html"
+        style="width:100%; height:78vh; border:1px solid #ddd; border-radius:6px;">
+</iframe>
+```
+
+::: {.callout-note appearance="minimal"}
+Sources: City of San José parcels, zoning, and Equity Index; ACS 2022 5-year
+estimates; OpenStreetMap building footprints. Capacity is theoretical zoned
+capacity, not a production forecast — see [Methods & Sources](methods.qmd).
+:::

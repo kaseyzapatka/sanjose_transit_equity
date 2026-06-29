@@ -1,6 +1,13 @@
 # files
 .DS_Store
 
-# folders 
+# folders
 _archived/
 /data
+/.quarto/
+**/*.quarto_ipynb
+*_PLAN.md
+
+# python
+__pycache__/
+*.pyc

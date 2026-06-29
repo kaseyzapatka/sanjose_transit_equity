@@ -1,0 +1,104 @@
+---
+title: "Methods & Sources"
+format:
+  html:
+    toc: true
+---
+
+## Study area
+
+All analysis is restricted to parcels whose centroid falls within **1 mile** of
+San José Diridon Station (37.3292, −121.9036) — 3,262 parcels, ~894 acres. The
+buffer is built in a metric projection (EPSG:3857) for an accurate distance;
+areas are computed in California State Plane Zone 3 (EPSG:2227, US survey feet).
+
+## Capacity
+
+For each parcel we compute **theoretical zoned capacity** = lot acreage ×
+maximum dwelling units per acre.
+
+**Maximum densities** come from the City's own code, not assumptions:
+
+| Zone | Max du/ac | Source |
+|---|---|---|
+| Urban Village (UV), Transit Residential (TR) | 250 | Title 20, Table 20-136 |
+| Urban Residential (UR) | 95 | Title 20, Table 20-136 |
+| Mixed-Use Commercial (MUC) | 50 | Title 20, Table 20-136 |
+| Mixed-Use Neighborhood (MUN) | 30 | Title 20, Table 20-136 |
+| Urban Village Commercial (UVC) | 0 (no residential) | Title 20, Table 20-136 |
+| Downtown (DC) | 350 | General Plan *Downtown* designation / DSAP (2021) |
+
+San José's urban-village districts generally set a *minimum* density; the
+*maximum* for UV/TR/UR is the top of the Table 20-136 range. Downtown (DC)
+density is governed by the Diridon Station Area Plan and the General Plan
+Downtown designation rather than a Title 20 du/ac figure.
+
+## Soft sites (net-new capacity)
+
+A **soft site** is a high-capacity parcel that is currently vacant, surface
+parking, or barely built — i.e., where new homes can realistically go. The
+ideal measure (assessor improvement-to-land value ratio) is **not openly
+published** for Santa Clara County; it is a paid bulk-data product. We therefore
+use an open, reproducible proxy: **building-footprint coverage** from
+OpenStreetMap. For each parcel we sum the footprint area of buildings clipped to
+the lot, divide by lot area, and flag parcels with **< 15% coverage** as soft
+sites. Where OSM records `building:levels`, a rough built-FAR is also computed.
+
+This is an *underbuilt / vacant* proxy, not a true existing-FAR measure: it sees
+ground coverage, not floors. The 15% threshold is a choice; capacity is stable
+across reasonable thresholds:
+
+| Coverage threshold | Net-new soft-site capacity |
+|---|---|
+| < 5% | ≈ 29,500 |
+| < 10% | ≈ 31,200 |
+| **< 15% (used)** | **≈ 34,600** |
+| < 20% | ≈ 41,500 |
+| < 25% | ≈ 44,400 |
+
+## Equity & displacement vulnerability
+
+Tract indicators are from the **ACS 2022 5-year** estimates, joined to the
+City's official **Equity Index** (1–5; higher = higher priority). For the 1-mile
+station-area tracts we build a transparent, flag-based vulnerability measure,
+with cut-points set at the **citywide median** so they are defensible rather
+than arbitrary:
+
+- **Renter-majority** — % renters above the citywide median
+- **Rent-burdened** — % rent-burdened renters above the citywide median
+- **Transit-dependent** — % households without a vehicle above the citywide median
+- **Equity-priority** — Equity Index score ≥ 4
+
+`vulnerability_score` = sum of the four flags (0–4); a tract is *high
+vulnerability* at 3+. Net-new capacity is then attributed to each parcel's tract.
+
+## Caveats
+
+- **Theoretical, not a forecast.** Zoned capacity is an upper bound on what the
+  code permits, not a prediction of what will be built. Market feasibility,
+  parcel assembly, and entitlement are out of scope.
+- **Soft sites are a proxy.** Footprint coverage flags underbuilt land but
+  cannot distinguish a developable surface lot from a civic/transport parcel or
+  protected open space; some zero-coverage parcels (e.g., the station and rail
+  right-of-way) inflate the gross Downtown figure and are why the net number is
+  treated as a ceiling.
+- **Vulnerability ≠ predicted displacement.** The flags identify exposure, not
+  outcomes.
+- **ACS margins of error** apply to all tract estimates, especially small tracts.
+
+## Data sources
+
+- City of San José Open Data — parcels, zoning districts, Equity Index census
+  tracts, affordable rental housing (<https://data.sanjoseca.gov>)
+- San José Municipal Code **Title 20** (Zoning), Ch. 20.55, Table 20-136
+- **Diridon Station Area Plan** (amended 2021) & General Plan land use designations
+- **ACS 2022 5-year** estimates via `pygris` / Census API
+- **OpenStreetMap** building footprints (© OpenStreetMap contributors, ODbL)
+
+## Reproducibility
+
+The full pipeline is three Python modules run in order:
+`code/02_diridon_capacity.py` → `code/03_diridon_equity.py` →
+`code/04_diridon_figures.py` (+ `code/05_diridon_interactive.py`). Each writes
+its outputs to `output/tables/`
+and `output/maps/`, which this memo reads.

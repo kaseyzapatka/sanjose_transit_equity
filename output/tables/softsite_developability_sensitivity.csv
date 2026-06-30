@@ -1,0 +1,4 @@
+basis,parcels,capacity
+soft sites (<15% coverage),351,42520
+  of which zero-coverage,219,21891
+strict floor (0% < coverage < 15%),132,20629

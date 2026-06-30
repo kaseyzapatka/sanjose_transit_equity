@@ -1,0 +1,150 @@
+---
+title: "Housing Capacity and Equity Around Diridon Station"
+subtitle: "Where San José's biggest transit investment can add homes — and for whom"
+author: "Kasey Zapatka"
+date: today
+format:
+  html:
+    toc: true
+  typst:
+    toc: false
+    papersize: us-letter
+    margin:
+      x: 1.6cm
+      y: 1.8cm
+---
+
+::: {.callout-note appearance="simple" icon=false}
+**Bottom line.** Within one mile of Diridon Station, San José's zoning permits a
+theoretical **≈ 120,000 homes** — but the lever that matters is the **Downtown
+core**, which holds **~88%** of that capacity and where roughly **38% of the
+zoned land is underbuilt** (largely surface parking and vacant lots). The zoned
+capacity on those underbuilt **"soft sites"** is **≈ 42,500 homes** — or a
+conservative **≈ 20,600** if every zero-footprint parcel (some of which may be
+rail or civic land) is set aside. Either way it is a large supply beside the
+region's marquee transit hub, in a neighborhood that is **68% renters** and
+**twice as transit-dependent** as the rest of the city — so capacity should be
+paired with anti-displacement and inclusionary tools, not unlocked on its own.
+:::
+
+## The question
+
+Diridon is the San Francisco Bay Area's flagship transit-oriented development
+site: the future convergence of BART's Silicon Valley extension, California
+High-Speed Rail, Caltrain, and Google's "Downtown West." It is exactly the kind
+of station area where regions hope to concentrate new housing. Two questions
+decide whether that hope is realistic:
+
+1. **Capacity** — does the zoning actually permit enough housing near the
+   station, and how much of it is on land that could realistically redevelop?
+2. **Equity** — who lives there now, and would adding homes put them at risk?
+
+## Approach
+
+We work at the **parcel level** within a **1-mile** station area (5,279 parcels,
+~1,420 acres; distances computed in California State Plane, not Web Mercator —
+see [Methods](methods.qmd)). For each parcel that permits housing we compute theoretical
+capacity as *lot acreage × maximum dwelling units per acre*, using **real
+maximum densities from San José's zoning code** (Title 20, Table 20-136) and the
+**Diridon Station Area Plan** for the Downtown core — not assumptions. We then
+narrow to **soft-site capacity** by keeping only **soft sites**: high-capacity
+parcels that are currently vacant or barely built, identified from
+**OpenStreetMap building-footprint coverage** (< 15% of the lot built). This is
+gross zoned capacity *on underbuilt land*, not capacity net of existing units.
+Finally
+we overlay **ACS 2022** demographics and the City's **Equity Index** to
+characterize who lives in the station area today. Full detail and caveats are in
+[Methods & Sources](methods.qmd).
+
+## Finding 1 — The capacity is real, and it is downtown
+
+![**The story in one map.** Coral parcels are *soft sites* — underbuilt,
+high-capacity lots clustered tightly around the station and through the Downtown
+core. They sit atop neighborhoods shaded by displacement vulnerability.](output/figures/hero_map.png){#fig-hero width=88%}
+
+The numbers reframe the opportunity. The six conventional mixed-use /
+urban-village zones near Diridon — the ones a citywide analysis would flag —
+cover about **100 acres** and permit roughly **14,700** homes. The bulk of the
+capacity is in the **Downtown (DC)** core, which covers **300 acres** and, under
+the DSAP's 350 du/ac ceiling, permits roughly **105,000** homes. Together that is
+**≈ 120,000 units** of gross zoned capacity.
+
+But gross capacity overstates what can happen, because much of that land is
+already developed. Restricting to **soft sites** — parcels that are vacant,
+surface parking, or barely built — leaves **≈ 42,500 homes** of zoned capacity,
+**~93% of it in the Downtown core**, where roughly **38% of the zoned land is
+underbuilt** today. San José's downtown parking problem is, in effect, its
+largest near-transit housing opportunity. Two honest qualifiers: this is gross
+capacity on redevelopable land, *not* net of existing units; and **about half of
+that capacity (~21,900 units) sits on parcels with no detected building** — some
+genuinely vacant, but some likely rail, station, or civic land. Excluding every
+such zero-footprint parcel gives a conservative floor of **≈ 20,600 homes**. The
+defensible range is therefore **~20,600–42,500** (see [FAQ](faq.qmd)).
+
+![Gross zoned capacity (grey) versus zoned capacity on underbuilt soft sites
+(coral), by zone. The Downtown core dominates both.](output/figures/capacity_by_zone.png){#fig-capacity width=92%}
+
+## Finding 2 — Who lives there now
+
+The station area is not a blank slate. Compared with San José as a whole, the
+1-mile area is overwhelmingly a **renters' neighborhood** and far more dependent
+on transit — the residents most exposed to rent pressure if redevelopment is not
+managed.
+
+![Station-area tracts versus citywide San José, ACS 2022. The station area is
+markedly more renter-occupied and transit-dependent. (Whole tracts intersecting
+the 1-mile ring, weighted by occupied housing units.)](output/figures/who_lives_here.png){#fig-equity width=92%}
+
+Encouragingly, most of the soft-site capacity (~84%) sits in **moderate**-
+vulnerability tracts (two of four flags) rather than the city's most
+disadvantaged neighborhoods — this is largely commercial downtown land, not
+established low-income housing. But "moderate" here still means
+**majority-renter and transit-reliant** (and, in the 1-mile area, lower median
+income than the city overall): exactly the population that benefits from new
+supply *and* is most vulnerable to being priced out during it.
+
+## Recommendation
+
+**Target the Downtown soft sites for mixed-income, transit-oriented housing —
+and pair upzoning with anti-displacement and inclusionary tools from the start.**
+
+The capacity is concentrated on underbuilt land — mostly surface parking and
+vacant lots — rather than on occupied housing, which suggests much of it could
+be added with limited *direct* displacement of existing residents (a parcel-by-
+parcel ownership and tenancy check would be the next step to confirm this). But
+because the surrounding population is renter-majority and transit-dependent,
+capacity alone risks raising rents faster than it adds affordability.
+
+This pairing is the central finding of my own peer-reviewed research. Work on New
+York City's rent-stabilization system shows that affordability policy is most
+effective when **tenant protections are coupled with inclusionary zoning** that
+expands supply, rather than either tool used alone.^[Zapatka, K., & de Castro
+Galvao, B. (2022). Affordable Regulation: New York City Rent Stabilization as
+Housing Affordability Policy. *City & Community*. doi:10.1177/15356841221123762]
+And parcel-level analysis of the *sequence* of neighborhood change shows that
+displacement pressure can be anticipated — and mitigated — before it
+arrives.^[Zapatka, K., & Beck, B. (2020). Does Demand Lead Supply? Fem-Led
+Neighborhood Change and the Sequence of Gentrification. *Urban Studies*.
+doi:10.1177/0042098020940596] Applied to Diridon: adopt soft-site upzoning **with**
+on-site affordability requirements, right-of-first-refusal / tenant-protection
+provisions for the few occupied parcels, and monitoring of the high-renter
+tracts the new capacity touches.
+
+## Caveats
+
+This is **theoretical zoned capacity**, not a production forecast — it measures
+what the code permits, not what the market will build. Soft sites are an *open-
+data proxy* (footprint coverage), so the Downtown figure is a ceiling: some
+zero-coverage parcels are the station, rail right-of-way, or open space rather
+than developable land. Vulnerability flags identify *exposure*, not predicted
+displacement, and ACS estimates carry margins of error. See
+[Methods & Sources](methods.qmd) for thresholds, sensitivity, and data lineage.
+
+---
+
+::: {.callout-tip appearance="simple" icon=false}
+**Sources.** City of San José parcels, zoning, and Equity Index; San José
+Municipal Code Title 20 (Table 20-136); Diridon Station Area Plan (2021); ACS
+2022 5-year estimates; OpenStreetMap building footprints. Analysis and figures:
+Kasey Zapatka, 2026.
+:::

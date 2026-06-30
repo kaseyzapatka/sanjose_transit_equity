@@ -1,19 +1,106 @@
-# San Jose Transit Equity  
+# Housing Capacity & Equity Around Diridon Station
 
-This project looks at transportation equity in downtown San Jose. 
+A parcel-level analysis of how much housing San José's zoning permits within one
+mile of **Diridon Station** — the Bay Area's flagship transit hub — and who
+lives there now. The analysis is packaged as an illustrated **Quarto website +
+PDF memo**.
 
-## Prepare virtual environment
-I created a virtual environment specifically for this exercise. You can recreate it running `pip install -r requirements.txt`. The python version used is `Python 3.13.5`. You need to first create a clean working environment. With `conda` you can do this by running this command in a terminal `conda create -n sanjose_case_study python=3.13.5` and then running `conda activate sanjose_case_study`. 
+**Read it:** <https://www.kaseyzapatka.com/sanjose_transit_equity>
 
-## Original data sources
+## What it finds
 
-- All shapefiles for San Jose City can be found at this [link](https://data.sanjoseca.gov/organization/maps-data). 
-- [Parcel shapefiles](https://data.sanjoseca.gov/dataset/parcels/resource/3e23d2d0-e07d-4d13-addd-608cc3221bd5). 
-- [Zoning shapefiles](https://data.sanjoseca.gov/dataset/zoning-districts/resource/3e2aacc3-f608-483e-85c6-f1be7e1e4995). 
-- San Jose City [zoning codes](https://library.municode.com/ca/san_jose/codes/code_of_ordinances?nodeId=TIT20ZO_CH20.10GEPRZODI_20.10.060ZODIES)
+- **≈ 120,000** homes of theoretical zoned capacity within 1 mile, **~88% in the
+  Downtown core** (governed by the Diridon Station Area Plan, not the citywide
+  mixed-use zones).
+- **≈ 42,500** homes of zoned capacity on currently **underbuilt "soft sites"**
+  (vacant lots / surface parking) — **~38% of Downtown's zoned land** is
+  underbuilt today — with a conservative **≈ 20,600** floor after excluding all
+  zero-footprint parcels. (Gross capacity on redevelopable land, not net of existing units.)
+- The station area is **68% renters** and **~2× as transit-dependent** as the
+  city, so the recommendation pairs upzoning with anti-displacement tools.
 
-## Data
-Since GitHub has data limitations, all data used for this project can be accessed [here](https://drive.google.com/drive/folders/1rM17LTuIoiBh7mqlefV8dIxEGZeKY9fc?usp=sharing). 
+## Environment
 
-## Running this analysis
-All coded needed to reproduce this analysis is in `code.ipynb` file. The `utils.py` file provides functions called in the analysis. 
+The default system Python will not have `geopandas`. Create the project
+environment first:
+
+```bash
+conda env create -f environment.yml
+conda activate sanjose_transit_equity
+```
+
+(or `pip install -r requirements.txt` into a clean Python 3.13 env).
+
+## Pipeline
+
+Processed data must be present in `data/processed/` (see **Data** below). Then
+run, in order, from `code/`:
+
+```bash
+python 02_diridon_capacity.py     # 1-mile capacity + soft sites (Title 20 / DSAP densities, OSM footprints)
+python 03_diridon_equity.py       # ACS + Equity Index overlay; displacement-vulnerability flags
+python 04_diridon_figures.py      # static figures (hero map, capacity bar, who-lives-here)
+python 05_diridon_interactive.py  # interactive Leaflet/folium hero map
+python check_outputs.py           # smoke test: verifies counts + table consistency
+```
+
+Each step writes to `output/tables/` and `output/maps/`, which the memo reads.
+`code/01_data_pipeline.py` (+ `functions.py`) is the upstream ETL that builds
+`data/processed/` from the raw San José open-data shapefiles and ACS. Distance
+work uses EPSG:2227 (California State Plane); the pipeline **fails fast** and
+writes outputs atomically, so a bad run cannot silently overwrite good tables.
+
+## Build the memo + site
+
+The site is a Quarto website rendered to `docs/` (served by GitHub Pages). A
+post-render hook produces the PDF via Quarto's bundled **Typst** (no LaTeX
+needed):
+
+```bash
+quarto render        # builds docs/ (HTML site) + docs/diridon_capacity_equity_memo.pdf
+quarto preview       # live local preview
+```
+
+Pages: repository **Settings → Pages → Deploy from branch → `main` / `docs`**.
+
+## Data sources
+
+- City of San José Open Data — parcels, zoning districts, Equity Index census
+  tracts, affordable rental housing (<https://data.sanjoseca.gov/organization/maps-data>)
+- San José Municipal Code **Title 20** (Zoning), Ch. 20.55, Table 20-136
+- **Diridon Station Area Plan** (amended 2021) and General Plan land use designations
+- **ACS 2022** 5-year estimates via `pygris` / Census API
+- **OpenStreetMap** building footprints (© OpenStreetMap contributors, ODbL)
+
+Large data files are kept off GitHub; download them here:
+<https://drive.google.com/drive/folders/1rM17LTuIoiBh7mqlefV8dIxEGZeKY9fc?usp=sharing>
+
+## Environment
+
+Python 3.13 with `geopandas`, `pygris`, `folium`, `matplotlib`, `seaborn`,
+`pyarrow`, `requests`. See `requirements.txt`. Rendering the site additionally
+requires [Quarto](https://quarto.org) ≥ 1.4.
+
+## Repository layout
+
+```
+code/                     analysis modules (capacity, equity, figures, interactive) + ETL
+  pipeline_utils.py       fail-fast checks + atomic writes shared by the pipeline
+  check_outputs.py        one-command smoke test (counts + table consistency)
+data/processed/           processed parcels, zoning, tracts, equity (off-GitHub)
+output/figures/           static figures (PNG + PDF)
+output/tables/            capacity & equity summary tables (CSV)
+output/maps/              parcel/tract layers + interactive map
+index.qmd                 the memo (main page)
+map.qmd, methods.qmd      interactive map + methods/sources pages
+_quarto.yml               website config (output-dir: docs)
+scripts/render_pdfs.sh    post-render hook -> PDF via Typst
+docs/                     rendered site (GitHub Pages)
+```
+
+## Caveats
+
+Capacity is **theoretical zoned capacity**, not a production forecast. Soft sites
+are an open-data **footprint-coverage proxy** (not assessor improvement value),
+so the Downtown figure is a ceiling. Vulnerability flags measure *exposure*, not
+predicted displacement. See the memo's *Methods & Sources* page for full detail.

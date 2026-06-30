@@ -1,0 +1,147 @@
+---
+title: "FAQ — anticipated reviewer questions"
+format:
+  html:
+    toc: true
+    toc-depth: 2
+---
+
+This page answers the questions a planner, economist, or hiring reviewer is most
+likely to press on. It is deliberately candid about what the analysis does and
+does not establish. Method detail and data lineage are on the
+[Methods & Sources](methods.qmd) page.
+
+## Capacity
+
+### Is "soft-site capacity" the same as net-new homes?
+
+**No — and the memo no longer calls it that.** Soft-site capacity is the *gross
+zoned capacity* on parcels that are currently underbuilt (vacant, surface
+parking, or low-rise). It is **not** net of the existing units on those parcels.
+Most soft sites are non-residential (parking lots and low-rise commercial), so
+the subtraction would be small, but the honest framing is "zoned capacity on
+redevelopable land," not "new units delivered." A parcel-by-parcel subtraction of
+existing units is the right next refinement.
+
+### Why apply a uniform 350 du/ac to the whole Downtown core?
+
+350 du/ac is the maximum of the General Plan **Downtown** land-use designation,
+which governs the DC zone (the Diridon Station Area Plan sits on top of it). It
+is a **ceiling, not a typical yield**: height limits, FAR, FAA/airport
+one-engine-out surfaces, historic districts, parking/loading, and tower-spacing
+rules will often bind *before* 350 du/ac does. That is exactly why every number
+is labeled *theoretical zoned capacity* and why the soft-site figure — not the
+120,000 gross — is the one the memo leads with. A height/FAR-aware envelope would
+lower the Downtown number and is the natural next step.
+
+### How are Planned-Development `(PD)` parcels handled?
+
+Each parcel's zoning is stripped of its `(PD)`/`(CL)` overlay to its base
+district (e.g., `DC(PD)` → `DC`). I checked whether the approved PD densities
+(`PDDENSITY`) could be used instead: within the station area they are **null or
+zero for every target parcel** (including all 101 `DC(PD)` parcels), so the base
+General-Plan/Title 20 maximums are the only available basis. Where a city later
+publishes site-specific PD entitlements, those should override the lookup.
+
+### Why include Downtown but exclude `R-M` and other residential zones?
+
+The question the memo asks is *where the station-area upzoning lever is* — and
+that is the Downtown core plus the mixed-use/urban-village districts. Lower-
+density residential zones like `R-M` are largely built out and are not where a
+TOD capacity debate plays out, so including them would add existing-neighborhood
+capacity that dilutes the station-area story. It would be a reasonable
+sensitivity to add; it does not change the finding that Downtown dominates.
+
+### Is `UVC` really zero residential capacity?
+
+Yes — under Title 20 Table 20-136, the Urban Village Commercial district does
+not permit stand-alone residential, so it contributes 0 to residential capacity.
+It is retained in the parcel set for completeness and shows as 0.
+
+## Soft sites
+
+### Why footprint coverage instead of assessor improvement-to-land ratio?
+
+The improvement-to-land ratio is the textbook soft-site measure, but Santa Clara
+County **does not publish parcel-level assessed values** — they are a paid
+bulk-data product. Building-footprint coverage from OpenStreetMap is the
+open, fully reproducible substitute. The [Methods](methods.qmd) page shows the
+soft-site total is stable across coverage thresholds (≈29.5k–44.4k from 5%–25%).
+
+### Could non-developable land (rail, the station, civic, parks) inflate the number?
+
+Partly, and this is the figure's main weakness. Parks, public/quasi-public, and
+agricultural zones (`OS`, `PQP`, `A`) are **already excluded** — they are not
+housing-permitting zones, so they never enter the capacity set. The residual
+risk is large **`DC`-zoned** parcels that are functionally rail right-of-way,
+the station, or other civic uses but carry Downtown zoning: **219 of 351 soft
+sites have zero detected building coverage (~21,900 units — about half the
+soft-site total)**, and the largest few are multi-acre Downtown parcels.
+Excluding every zero-footprint parcel gives a conservative floor of **≈ 20,600
+units**, so the defensible range is **~20,600–42,500**. A parcel-level
+ownership/use screen (civic/rail, active entitlements) would tighten this; until
+then the memo reports the range and treats the Downtown figure as a ceiling.
+
+### Is "42% vacant or surface parking" a verified land-use statistic?
+
+No. It is **~38% of Downtown's zoned land with less than 15% building coverage** —
+inferred underbuilt land, not classified land use. The memo now says
+"underbuilt" and names parking/vacant lots as the likely composition rather than
+asserting a verified land-use split.
+
+### How complete is OpenStreetMap downtown, and what if footprints are missing?
+
+OSM building coverage in downtown San José is strong, but it is not perfect.
+Missing footprints would *over*-count soft sites (a built parcel read as empty) —
+which pushes in the **same direction** as the non-developable-land issue above.
+Both are reasons the soft-site capacity is best read as an upper bound rather
+than a point estimate.
+
+## Equity
+
+### Are the demographics for residents inside the 1-mile ring, or whole tracts?
+
+**Whole census tracts that intersect the ring**, weighted by occupied housing
+units — so the profile describes the surrounding neighborhoods, not only the
+population strictly inside the circle. Tracts are coarser than the parcel buffer;
+apportioning ACS to the buffer is possible but adds false precision to
+margin-of-error-laden estimates.
+
+### Could a high-income, renter-heavy Downtown tract get flagged "vulnerable"?
+
+Yes — the renter and no-vehicle flags can fire in an affluent downtown tract.
+That is why vulnerability uses **four** flags including the City's own Equity
+Index (which encodes income, race, language, and education), and why the memo
+reports that most capacity sits in *moderate* (2-of-4), not *high* (3+),
+vulnerability tracts. The score measures **exposure**, not a prediction of
+displacement.
+
+### Is ACS 2022 too old for a 2026 analysis?
+
+ACS 2022 5-year was the latest stable release when the analysis was built. The
+*structural* facts the memo relies on — a renter-majority, transit-dependent
+downtown — move slowly and are very unlikely to flip in one or two ACS vintages;
+refreshing to ACS 2023 5-year would be a quick update.
+
+## Scope & feasibility
+
+### Where is the pro forma / financial feasibility?
+
+Out of scope, by design. This is a **capacity and equity screen**, not a
+feasibility study. It answers "where could homes go and who lives there," not
+"what penciling rents, construction costs, parking, impact fees, and
+inclusionary requirements would make a given site build." A residual-land-value
+or achievable-density sensitivity is the natural next phase and would pair well
+with the soft-site list.
+
+## Reproducibility
+
+### Can a reviewer regenerate these numbers?
+
+Yes. `environment.yml` pins the spatial stack; the four scripts run in order
+(`02`→`05`) from `code/`. The pipeline now **fails fast** — it asserts the
+station selection returns the expected order of magnitude (≈5,279 parcels in 1
+mile, ≈1,199 housing-permitting parcels, ≈13 tracts) and writes outputs
+**atomically** (temp file → replace), so a bad run cannot silently overwrite good
+outputs. Generated tables/figures are committed so the published memo is always
+traceable to a specific pipeline run.

@@ -4,7 +4,10 @@ GEOID,equity_score,pct_renters,rent_burdened_pct,poverty_rate,no_vehicle_pct,pub
 06085500600,2,69.6,44.2,14.3,13.0,8.7,119675.0,2572.0,True,True,True,False,3,True
 06085501902,3,80.3,41.1,1.5,4.6,6.3,142981.0,2780.0,True,True,True,False,3,True
 06085501700,4,74.2,31.8,13.8,6.7,9.5,86995.0,2449.0,True,False,True,True,3,True
+06085500400,2,57.4,46.5,4.8,9.8,13.9,146607.0,2333.0,True,True,True,False,3,True
 06085500500,1,21.2,40.8,8.5,11.2,5.5,171885.0,2198.0,False,True,True,False,2,False
+06085501000,3,89.8,31.4,14.6,23.0,8.1,54588.0,1506.0,True,False,True,False,2,False
+06085500901,3,79.5,34.0,35.4,25.1,10.4,73750.0,2154.0,True,False,True,False,2,False
 06085500800,2,76.6,26.1,11.7,21.4,9.8,152112.0,2774.0,True,False,True,False,2,False
 06085501800,2,50.8,58.7,2.1,2.3,0.9,137708.0,2340.0,True,True,False,False,2,False
 06085500300,2,63.3,36.7,13.9,3.0,8.4,116172.0,2592.0,True,True,False,False,2,False

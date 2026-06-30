@@ -9,14 +9,27 @@ PDF memo**.
 
 ## What it finds
 
-- **≈ 88,000** homes of theoretical zoned capacity within 1 mile, **~90% in the
+- **≈ 120,000** homes of theoretical zoned capacity within 1 mile, **~88% in the
   Downtown core** (governed by the Diridon Station Area Plan, not the citywide
   mixed-use zones).
-- **≈ 34,600** net-new homes if only currently **underbuilt "soft sites"**
-  (vacant lots / surface parking) redevelop — **~42% of Downtown's zoned land**
-  is still vacant or surface parking.
-- The station area is **64% renters** and **~2× as transit-dependent** as the
+- **≈ 42,500** homes of zoned capacity on currently **underbuilt "soft sites"**
+  (vacant lots / surface parking) — **~38% of Downtown's zoned land** is
+  underbuilt today — with a conservative **≈ 20,600** floor after excluding all
+  zero-footprint parcels. (Gross capacity on redevelopable land, not net of existing units.)
+- The station area is **68% renters** and **~2× as transit-dependent** as the
   city, so the recommendation pairs upzoning with anti-displacement tools.
+
+## Environment
+
+The default system Python will not have `geopandas`. Create the project
+environment first:
+
+```bash
+conda env create -f environment.yml
+conda activate sanjose_transit_equity
+```
+
+(or `pip install -r requirements.txt` into a clean Python 3.13 env).
 
 ## Pipeline
 
@@ -28,11 +41,14 @@ python 02_diridon_capacity.py     # 1-mile capacity + soft sites (Title 20 / DSA
 python 03_diridon_equity.py       # ACS + Equity Index overlay; displacement-vulnerability flags
 python 04_diridon_figures.py      # static figures (hero map, capacity bar, who-lives-here)
 python 05_diridon_interactive.py  # interactive Leaflet/folium hero map
+python check_outputs.py           # smoke test: verifies counts + table consistency
 ```
 
 Each step writes to `output/tables/` and `output/maps/`, which the memo reads.
 `code/01_data_pipeline.py` (+ `functions.py`) is the upstream ETL that builds
-`data/processed/` from the raw San José open-data shapefiles and ACS.
+`data/processed/` from the raw San José open-data shapefiles and ACS. Distance
+work uses EPSG:2227 (California State Plane); the pipeline **fails fast** and
+writes outputs atomically, so a bad run cannot silently overwrite good tables.
 
 ## Build the memo + site
 
@@ -69,6 +85,8 @@ requires [Quarto](https://quarto.org) ≥ 1.4.
 
 ```
 code/                     analysis modules (capacity, equity, figures, interactive) + ETL
+  pipeline_utils.py       fail-fast checks + atomic writes shared by the pipeline
+  check_outputs.py        one-command smoke test (counts + table consistency)
 data/processed/           processed parcels, zoning, tracts, equity (off-GitHub)
 output/figures/           static figures (PNG + PDF)
 output/tables/            capacity & equity summary tables (CSV)

@@ -5,6 +5,7 @@ project:
     - "index.qmd"
     - "map.qmd"
     - "methods.qmd"
+    - "faq.qmd"
   post-render:
     - scripts/render_pdfs.sh
   resources:
@@ -22,6 +23,8 @@ website:
         href: map.qmd
       - text: "Methods & Sources"
         href: methods.qmd
+      - text: "FAQ"
+        href: faq.qmd
     right:
       - text: "Download PDF"
         href: diridon_capacity_equity_memo.pdf

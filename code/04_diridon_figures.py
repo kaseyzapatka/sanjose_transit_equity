@@ -5,7 +5,7 @@
 # diridon_equity.py and renders three minimalist figures:
 #   1. hero_map ............ station-area parcels by capacity, soft sites in
 #                            coral, vulnerability tracts shaded plum underneath
-#   2. capacity_by_zone .... gross vs net-new soft-site capacity per zone
+#   2. capacity_by_zone .... gross vs soft-site capacity per zone
 #   3. who_lives_here ...... station-area vs citywide dumbbell chart
 #
 # Outputs PNG (web) + PDF (print) to output/figures/.
@@ -108,7 +108,7 @@ def hero_map():
 
 
 # ---------------------------------------------------------------------------
-# 2. Capacity by zone (gross vs net-new soft-site)
+# 2. Capacity by zone (gross vs soft-site)
 # ---------------------------------------------------------------------------
 def capacity_by_zone():
     df = pd.read_csv(TABLES / "capacity_by_zone.csv")
@@ -123,7 +123,7 @@ def capacity_by_zone():
     ax.barh(y, df["gross_capacity"], color=vs.NEUTRAL, height=0.62,
             label="Gross zoned capacity", zorder=2)
     ax.barh(y, df["softsite_capacity"], color=vs.CORAL, height=0.62,
-            label="Net-new on soft sites", zorder=3)
+            label="Capacity on soft sites", zorder=3)
     ax.set_yticks(y)
     ax.set_yticklabels(df["name"])
     ax.set_xlabel("Theoretical dwelling-unit capacity")

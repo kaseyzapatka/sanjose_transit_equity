@@ -8,9 +8,15 @@ format:
 ## Study area
 
 All analysis is restricted to parcels whose centroid falls within **1 mile** of
-San José Diridon Station (37.3292, −121.9036) — 3,262 parcels, ~894 acres. The
-buffer is built in a metric projection (EPSG:3857) for an accurate distance;
-areas are computed in California State Plane Zone 3 (EPSG:2227, US survey feet).
+San José Diridon Station (37.3292, −121.9036) — **5,279 parcels, ~1,420 acres**.
+
+Both the 1-mile buffer and all areas are computed in **California State Plane
+Zone 3 (EPSG:2227, US survey feet)**, the data's native projection and a locally
+accurate one. We deliberately do *not* buffer in Web Mercator (EPSG:3857): at
+Diridon's latitude (~37.3°), Web Mercator inflates projected distances by
+1/cos(lat) ≈ 1.26, so a "1-mile" (1,609 m) Web-Mercator buffer is really only
+~0.8 mile on the ground. Using State Plane (1 mile = 5,280 ft) keeps the radius
+honest and avoids a bulk reprojection step that can fail on some PROJ installs.
 
 ## Capacity
 
@@ -33,7 +39,7 @@ San José's urban-village districts generally set a *minimum* density; the
 density is governed by the Diridon Station Area Plan and the General Plan
 Downtown designation rather than a Title 20 du/ac figure.
 
-## Soft sites (net-new capacity)
+## Soft sites (soft-site capacity)
 
 A **soft site** is a high-capacity parcel that is currently vacant, surface
 parking, or barely built — i.e., where new homes can realistically go. The
@@ -45,16 +51,26 @@ the lot, divide by lot area, and flag parcels with **< 15% coverage** as soft
 sites. Where OSM records `building:levels`, a rough built-FAR is also computed.
 
 This is an *underbuilt / vacant* proxy, not a true existing-FAR measure: it sees
-ground coverage, not floors. The 15% threshold is a choice; capacity is stable
-across reasonable thresholds:
+ground coverage, not floors. "Soft-site capacity" is the **gross zoned capacity
+on these underbuilt parcels** — it is *not* net of the existing units already on
+them (most soft sites are non-residential — surface lots, parking, low-rise
+commercial — but we do not subtract existing units parcel by parcel). The 15%
+threshold is a choice; capacity is stable across reasonable thresholds:
 
-| Coverage threshold | Net-new soft-site capacity |
+| Coverage threshold | Soft-site capacity |
 |---|---|
-| < 5% | ≈ 29,500 |
-| < 10% | ≈ 31,200 |
-| **< 15% (used)** | **≈ 34,600** |
-| < 20% | ≈ 41,500 |
-| < 25% | ≈ 44,400 |
+| < 5% | ≈ 34,200 |
+| < 10% | ≈ 37,600 |
+| **< 15% (used)** | **≈ 42,500** |
+| < 20% | ≈ 50,400 |
+| < 25% | ≈ 53,900 |
+
+**Developability floor.** About half of the soft-site capacity (~21,900 units,
+219 of 351 parcels) sits on parcels with *zero* detected building footprint —
+some genuinely vacant or surface parking, some likely rail, station, or civic
+land carrying Downtown zoning. Excluding all zero-footprint parcels gives a
+conservative floor of **≈ 20,600 units**; the defensible range is therefore
+**~20,600–42,500**. A parcel-level ownership/use screen would tighten this.
 
 ## Equity & displacement vulnerability
 
@@ -70,7 +86,15 @@ than arbitrary:
 - **Equity-priority** — Equity Index score ≥ 4
 
 `vulnerability_score` = sum of the four flags (0–4); a tract is *high
-vulnerability* at 3+. Net-new capacity is then attributed to each parcel's tract.
+vulnerability* at 3+ and *moderate* at 2. Soft-site capacity is then attributed
+to each parcel's tract by GEOID.
+
+Two scope notes: (1) the "who lives here" profile uses **whole tracts that
+intersect** the 1-mile ring (population/housing-unit weighted), not tract
+populations clipped to the buffer — so it describes the surrounding
+neighborhoods, not only residents inside the exact ring. (2) "Transit-dependent"
+in the vulnerability score is operationalized as **no-vehicle households**; the
+memo separately reports transit-commute share as a descriptive statistic.
 
 ## Caveats
 

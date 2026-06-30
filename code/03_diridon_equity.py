@@ -12,12 +12,12 @@
 #
 # Builds a transparent, flag-based displacement-vulnerability measure for the
 # station-area tracts, characterizes the resident population, and quantifies
-# how much net-new capacity sits in vulnerable / equity-priority tracts.
+# how much soft-site capacity sits in vulnerable / equity-priority tracts.
 #
 # Outputs (consumed by the Quarto memo + hero map):
 #   output/tables/station_tract_profile.csv         (per-tract indicators + flags)
 #   output/tables/who_lives_here.csv                (station-area summary vs citywide)
-#   output/tables/capacity_x_vulnerability.csv      (net-new capacity by vulnerability)
+#   output/tables/capacity_x_vulnerability.csv      (soft-site capacity by vulnerability)
 #   output/maps/diridon_station_tracts.geoparquet   (tract layer for equity shading)
 #
 # Author: Kasey Zapatka
@@ -31,6 +31,8 @@ import pandas as pd
 import geopandas as gpd
 from shapely.geometry import Point
 
+from pipeline_utils import require, check_geo, save_csv, save_parquet
+
 warnings.filterwarnings("ignore", category=FutureWarning)
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -39,7 +41,8 @@ OUTPUT = ROOT / "output"
 
 DIRIDON_LONLAT = (-121.9036, 37.3292)
 MILE_M = 1609.344
-METRIC_CRS = 3857
+STATE_PLANE = 2227                         # California zone 3 (US ft) — locally accurate
+MILE_FT = MILE_M / 0.3048006096012192      # 1 mile in US survey feet (≈ 5279.99)
 
 # Indicators used to characterize residents and flag vulnerability.
 PROFILE_COLS = [
@@ -100,9 +103,9 @@ def flag_vulnerability(tracts: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 
 def select_station(tracts: gpd.GeoDataFrame, miles: float = 1.0) -> gpd.GeoDataFrame:
     """Tracts intersecting the `miles`-mile station buffer."""
-    pt = gpd.GeoSeries([Point(*DIRIDON_LONLAT)], crs=4326).to_crs(METRIC_CRS).iloc[0]
-    buf = pt.buffer(miles * MILE_M)
-    sel_idx = tracts.to_crs(METRIC_CRS).geometry.intersects(buf)
+    pt = gpd.GeoSeries([Point(*DIRIDON_LONLAT)], crs=4326).to_crs(STATE_PLANE).iloc[0]
+    buf = pt.buffer(miles * MILE_FT)
+    sel_idx = tracts.to_crs(STATE_PLANE).geometry.intersects(buf)
     return tracts[sel_idx].copy()
 
 
@@ -127,7 +130,7 @@ def who_lives_here(station_tracts: gpd.GeoDataFrame,
 
 
 # ---------------------------------------------------------------------------
-# Step 4 — Net-new capacity x vulnerability
+# Step 4 — Soft-site capacity x vulnerability
 # ---------------------------------------------------------------------------
 def capacity_by_vulnerability(flagged_tracts: gpd.GeoDataFrame) -> pd.DataFrame:
     """Assign each capacity parcel to its tract and total capacity by the
@@ -141,13 +144,16 @@ def capacity_by_vulnerability(flagged_tracts: gpd.GeoDataFrame) -> pd.DataFrame:
 
     # A handful of large downtown parcels have no tract GEOID from the pipeline;
     # assign them spatially (parcel centroid within tract) so their capacity is
-    # not dropped from the equity overlay.
+    # not dropped from the equity overlay. Centroids are computed in a projected
+    # CRS and reprojected to the tracts' CRS so the join is correct (no
+    # geographic-centroid warning, no CRS mismatch).
     missing = parcels["GEOID"].isna()
     if missing.any():
-        cent = parcels.loc[missing].copy()
+        cent = parcels.loc[missing, ["geometry"]].to_crs(STATE_PLANE)
         cent["geometry"] = cent.geometry.centroid
+        cent = cent.to_crs(flagged_tracts.crs)
         joined = gpd.sjoin(
-            cent[["geometry"]], flagged_tracts[["GEOID", "geometry"]],
+            cent, flagged_tracts[["GEOID", "geometry"]],
             how="left", predicate="within",
         )
         parcels.loc[missing, "GEOID"] = joined["GEOID"].values
@@ -180,6 +186,8 @@ def run(miles: float = 1.0) -> gpd.GeoDataFrame:
 
     print("Loading tracts + Equity Index...")
     tracts = load_tracts_with_equity()
+    check_geo(tracts, "san_jose_tracts", min_rows=150)
+    require(tracts["equity_score"].notna().any(), "no tracts matched an Equity Index score")
 
     print("Flagging displacement vulnerability (citywide-relative)...")
     flagged = flag_vulnerability(tracts)
@@ -187,32 +195,39 @@ def run(miles: float = 1.0) -> gpd.GeoDataFrame:
     print(f"Selecting station-area tracts ({miles}-mile)...")
     station = select_station(flagged, miles=miles)
     print(f"  {len(station)} tracts | high-vulnerability: {int(station['high_vulnerability'].sum())}")
+    # fail fast: a zero-tract selection means a CRS/geometry problem upstream;
+    # do NOT write empty/NaN outputs over good ones.
+    require(len(station) >= 5,
+            f"station-area tract selection returned {len(station)} (expected ~10); "
+            "aborting before overwriting outputs")
 
     # per-tract profile
     prof_cols = (["GEOID", "equity_score"] + PROFILE_COLS +
                  ["renter_majority", "rent_burdened", "transit_dependent",
                   "equity_priority", "vulnerability_score", "high_vulnerability"])
     profile = station[prof_cols].sort_values("vulnerability_score", ascending=False)
-    profile.round(1).to_csv(tables / "station_tract_profile.csv", index=False)
+    save_csv(profile.round(1), tables / "station_tract_profile.csv")
 
     # who lives here
     wlh = who_lives_here(station, tracts)
-    wlh.to_csv(tables / "who_lives_here.csv", index=False)
+    require(wlh["station_area"].notna().all(),
+            "who-lives-here produced NaN station-area values; aborting")
+    save_csv(wlh, tables / "who_lives_here.csv")
     print("\n=== Who lives in the station area (pop-weighted) vs citywide ===")
     print(wlh.to_string(index=False))
 
     # capacity x vulnerability (merge against all flagged tracts)
     cxv = capacity_by_vulnerability(flagged)
-    cxv.to_csv(tables / "capacity_x_vulnerability.csv", index=False)
-    print("\n=== Net-new soft-site capacity by tract vulnerability score ===")
+    save_csv(cxv, tables / "capacity_x_vulnerability.csv")
+    print("\n=== Soft-site capacity by tract vulnerability score ===")
     print(cxv.to_string(index=False))
-    print(f"\nShare of net-new capacity in HIGH-vulnerability tracts: "
+    print(f"\nShare of soft-site capacity in HIGH-vulnerability tracts: "
           f"{cxv.attrs['share_high_vuln']}%")
     print(f"Share in equity-priority tracts (score >= 4): "
           f"{cxv.attrs['share_equity_priority']}%")
 
     # tract layer for hero-map shading
-    station.to_crs(4326).to_parquet(maps / "diridon_station_tracts.geoparquet")
+    save_parquet(station.to_crs(4326), maps / "diridon_station_tracts.geoparquet")
     print("\nWrote tables to output/tables/ and tract layer to "
           "output/maps/diridon_station_tracts.geoparquet")
     return station

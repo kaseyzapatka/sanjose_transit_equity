@@ -1,2 +1,2 @@
-station_parcels_1mi,target_parcels,target_acres,gross_capacity,softsite_capacity,soft_parcels,soft_coverage_threshold
-3262,753,279.8,88115,34586,274,0.15
+station_parcels_1mi,target_parcels,target_acres,gross_capacity,softsite_capacity,softsite_capacity_strict,soft_parcels,soft_parcels_zero_coverage,soft_coverage_threshold
+5279,1199,400.5,119703,42520,20629,351,219,0.15

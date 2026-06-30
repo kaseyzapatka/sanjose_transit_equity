@@ -11,3 +11,6 @@ _archived/
 # python
 __pycache__/
 *.pyc
+
+# local review notes (not for publication)
+code/notes.md

@@ -8,7 +8,7 @@
 #      (Ch. 20.55, Table 20-136) plus the Downtown / Diridon Station Area
 #      Plan (DSAP) designation for Downtown (DC) parcels.
 #   2. Capacity restricted to the 1-mile Diridon station area.
-#   3. Net / "soft-site" capacity: a soft site is a high-capacity parcel that
+#   3. Soft-site capacity: a soft site is a high-capacity parcel that
 #      is currently vacant or barely built. Because Santa Clara County does
 #      not publish parcel-level assessed values (improvement-to-land ratio is
 #      a paid bulk-data product), underutilization is measured from OPEN
@@ -35,6 +35,8 @@ import geopandas as gpd
 import requests
 from shapely.geometry import Point, Polygon
 
+from pipeline_utils import require, check_geo, save_csv, save_parquet
+
 warnings.filterwarnings("ignore", category=FutureWarning)
 warnings.filterwarnings("ignore", message=".*centroid.*")
 
@@ -47,9 +49,13 @@ OUTPUT = ROOT / "output"
 
 DIRIDON_LONLAT = (-121.9036, 37.3292)   # Diridon Station (lon, lat)
 MILE_M = 1609.344                        # 1 mile in meters
-PARCEL_CRS = 2227                        # NAD83 / California zone 3 (US ft) — source CRS
-METRIC_CRS = 3857                        # for distance buffering
+PARCEL_CRS = 2227                        # NAD83 / California zone 3 (US ft) — data's native CRS
 SQFT_PER_ACRE = 43_560
+# Distance work is done in EPSG:2227 (California State Plane, US survey feet),
+# which is locally accurate. Buffering in EPSG:3857 (Web Mercator) would shrink
+# the radius by ~1/cos(lat) ≈ 0.8x at Diridon's latitude — i.e. a "1-mile"
+# Web-Mercator buffer is really ~0.8 mile on the ground.
+MILE_FT = MILE_M / 0.3048006096012192    # 1 mile in US survey feet (≈ 5279.99)
 
 # Maximum dwelling units / acre for 100% residential projects.
 #   Mixed-use / urban-village districts: San Jose Municipal Code Title 20,
@@ -85,12 +91,15 @@ def load_station_area(miles: float = 1.0) -> gpd.GeoDataFrame:
     parcels = gpd.read_parquet(
         DATA / "processed" / "parcels_with_zoning_and_tract_data.parquet"
     )
-    pt = gpd.GeoSeries([Point(*DIRIDON_LONLAT)], crs=4326).to_crs(METRIC_CRS).iloc[0]
-    buffer = pt.buffer(miles * MILE_M)
+    check_geo(parcels, "processed parcels (source)", min_rows=100_000)
 
-    pm = parcels.to_crs(METRIC_CRS)
-    within = pm[pm.geometry.centroid.within(buffer)]
-    station = parcels.loc[within.index].to_crs(PARCEL_CRS).copy()
+    # Buffer in the data's native State Plane CRS (US survey feet) — locally
+    # accurate, and avoids the Web Mercator distortion / bulk reprojection that
+    # otherwise shrinks the radius and can fail on some PROJ installs.
+    pt = gpd.GeoSeries([Point(*DIRIDON_LONLAT)], crs=4326).to_crs(PARCEL_CRS).iloc[0]
+    buffer = pt.buffer(miles * MILE_FT)
+    station = parcels[parcels.geometry.centroid.within(buffer)].copy()
+    check_geo(station, f"{miles}-mile station parcels", min_rows=500)
 
     # base zoning code, stripped of (PD)/(CL) overlays
     station["zbase"] = (
@@ -234,6 +243,10 @@ def summarize_and_export(parcels: gpd.GeoDataFrame) -> dict:
     maps.mkdir(parents=True, exist_ok=True)
 
     target = parcels[parcels["is_target"]].copy()
+    # fail fast before writing: a zero-target selection means a CRS/zoning
+    # problem upstream; don't overwrite good outputs with empties.
+    require(len(target) >= 100,
+            f"target (housing-permitting) parcels = {len(target)} (expected ~750); aborting")
 
     # by tier
     by_tier = target.groupby("tier").apply(lambda g: pd.Series({
@@ -245,7 +258,7 @@ def summarize_and_export(parcels: gpd.GeoDataFrame) -> dict:
         "softsite_capacity": round(g["softsite_capacity"].sum()),
         "median_coverage_pct": round(g["coverage"].median() * 100),
     })).reset_index()
-    by_tier.to_csv(tables / "capacity_by_tier.csv", index=False)
+    save_csv(by_tier, tables / "capacity_by_tier.csv")
 
     # by zone (mixed-use detail + DC)
     order = ["UV", "TR", "UR", "MUC", "MUN", "DC"]
@@ -257,7 +270,7 @@ def summarize_and_export(parcels: gpd.GeoDataFrame) -> dict:
         "soft_parcels": int(g["soft_site"].sum()),
         "softsite_capacity": round(g["softsite_capacity"].sum()),
     })).reindex([z for z in order if z in target["zbase"].unique()]).reset_index()
-    by_zone.to_csv(tables / "capacity_by_zone.csv", index=False)
+    save_csv(by_zone, tables / "capacity_by_zone.csv")
 
     # threshold sensitivity
     rows = []
@@ -272,7 +285,25 @@ def summarize_and_export(parcels: gpd.GeoDataFrame) -> dict:
             "mixeduse_softsite_capacity": round(
                 soft.loc[soft["zbase"] != "DC", "gross_capacity"].sum()),
         })
-    pd.DataFrame(rows).to_csv(tables / "softsite_threshold_sensitivity.csv", index=False)
+    save_csv(pd.DataFrame(rows), tables / "softsite_threshold_sensitivity.csv")
+
+    # developability sensitivity: parcels with ZERO detected footprint may be
+    # genuine vacant lots / surface parking OR non-developable civic, rail, or
+    # station land carrying DC zoning. The "strict" floor drops all zero-coverage
+    # parcels — conservative (it also drops some real vacant land), but it bounds
+    # how much of the soft-site number rests on unverified zero-coverage parcels.
+    soft = target[target["soft_site"]]
+    zero_cov = soft[soft["coverage"] == 0]
+    strict = soft[soft["coverage"] > 0]
+    dev = pd.DataFrame([
+        {"basis": "soft sites (<15% coverage)", "parcels": len(soft),
+         "capacity": round(soft["gross_capacity"].sum())},
+        {"basis": "  of which zero-coverage", "parcels": len(zero_cov),
+         "capacity": round(zero_cov["gross_capacity"].sum())},
+        {"basis": "strict floor (0% < coverage < 15%)", "parcels": len(strict),
+         "capacity": round(strict["gross_capacity"].sum())},
+    ])
+    save_csv(dev, tables / "softsite_developability_sensitivity.csv")
 
     # headline numbers
     headline = pd.DataFrame([{
@@ -281,10 +312,12 @@ def summarize_and_export(parcels: gpd.GeoDataFrame) -> dict:
         "target_acres": round(target["acres"].sum(), 1),
         "gross_capacity": round(target["gross_capacity"].sum()),
         "softsite_capacity": round(target["softsite_capacity"].sum()),
+        "softsite_capacity_strict": round(strict["gross_capacity"].sum()),
         "soft_parcels": int(target["soft_site"].sum()),
+        "soft_parcels_zero_coverage": int(len(zero_cov)),
         "soft_coverage_threshold": SOFT_COVERAGE_THRESHOLD,
     }])
-    headline.to_csv(tables / "capacity_headline.csv", index=False)
+    save_csv(headline, tables / "capacity_headline.csv")
 
     # per-parcel layer for the hero map (EPSG:4326 for web mapping)
     keep = ["PARCELID", "APN", "ZONING", "zbase", "GEOID", "acres", "lot_sqft",
@@ -292,7 +325,7 @@ def summarize_and_export(parcels: gpd.GeoDataFrame) -> dict:
             "is_target", "gross_capacity", "soft_site", "softsite_capacity",
             "geometry"]
     layer = parcels[parcels["is_target"]][keep].to_crs(4326)
-    layer.to_parquet(maps / "diridon_station_capacity.geoparquet")
+    save_parquet(layer, maps / "diridon_station_capacity.geoparquet")
 
     return {"by_tier": by_tier, "by_zone": by_zone, "headline": headline}
 
@@ -322,9 +355,9 @@ def run(refresh_footprints: bool = False) -> gpd.GeoDataFrame:
     print("\n=== Capacity by zone ===")
     print(res["by_zone"].to_string(index=False))
     h = res["headline"].iloc[0]
-    print(f"\nTOTAL gross capacity: {h['gross_capacity']:,.0f}")
-    print(f"TOTAL net-new soft-site capacity: {h['softsite_capacity']:,.0f} "
-          f"({h['soft_parcels']} soft-site parcels)")
+    print(f"\nTOTAL gross zoned capacity: {h['gross_capacity']:,.0f}")
+    print(f"TOTAL soft-site capacity (gross capacity on underbuilt parcels): "
+          f"{h['softsite_capacity']:,.0f} ({h['soft_parcels']} soft-site parcels)")
     print("\nWrote tables to output/tables/ and parcel layer to "
           "output/maps/diridon_station_capacity.geoparquet")
     return station

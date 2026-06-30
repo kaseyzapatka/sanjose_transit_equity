@@ -1,0 +1,18 @@
+name: sanjose_transit_equity
+channels:
+  - conda-forge
+dependencies:
+  - python=3.13
+  # spatial + data stack
+  - geopandas=1.*
+  - pandas=2.*
+  - numpy=2.*
+  - pyarrow            # read/write (geo)parquet
+  - shapely
+  - mapclassify        # choropleth binning for geopandas plots
+  - requests           # Overpass (OSM) footprints
+  - pygris             # ACS + TIGER geometries (ETL)
+  # figures
+  - matplotlib
+  # site rendering (optional; or install Quarto separately)
+  - pip

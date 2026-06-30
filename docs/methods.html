@@ -4018,6 +4018,10 @@ vertical-align: -.125em;
     <a class="nav-link active" href="./methods.html" aria-current="page"> 
 <span class="menu-text">Methods &amp; Sources</span></a>
   </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./faq.html"> 
+<span class="menu-text">FAQ</span></a>
+  </li>  
 </ul>
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
@@ -4046,7 +4050,7 @@ vertical-align: -.125em;
   <ul>
   <li><a href="#study-area" id="toc-study-area" class="nav-link active" data-scroll-target="#study-area">Study area</a></li>
   <li><a href="#capacity" id="toc-capacity" class="nav-link" data-scroll-target="#capacity">Capacity</a></li>
-  <li><a href="#soft-sites-net-new-capacity" id="toc-soft-sites-net-new-capacity" class="nav-link" data-scroll-target="#soft-sites-net-new-capacity">Soft sites (net-new capacity)</a></li>
+  <li><a href="#soft-sites-soft-site-capacity" id="toc-soft-sites-soft-site-capacity" class="nav-link" data-scroll-target="#soft-sites-soft-site-capacity">Soft sites (soft-site capacity)</a></li>
   <li><a href="#equity-displacement-vulnerability" id="toc-equity-displacement-vulnerability" class="nav-link" data-scroll-target="#equity-displacement-vulnerability">Equity &amp; displacement vulnerability</a></li>
   <li><a href="#caveats" id="toc-caveats" class="nav-link" data-scroll-target="#caveats">Caveats</a></li>
   <li><a href="#data-sources" id="toc-data-sources" class="nav-link" data-scroll-target="#data-sources">Data sources</a></li>
@@ -4082,7 +4086,8 @@ vertical-align: -.125em;
 
 <section id="study-area" class="level2">
 <h2 class="anchored" data-anchor-id="study-area">Study area</h2>
-<p>All analysis is restricted to parcels whose centroid falls within <strong>1 mile</strong> of San José Diridon Station (37.3292, −121.9036) — 3,262 parcels, ~894 acres. The buffer is built in a metric projection (EPSG:3857) for an accurate distance; areas are computed in California State Plane Zone 3 (EPSG:2227, US survey feet).</p>
+<p>All analysis is restricted to parcels whose centroid falls within <strong>1 mile</strong> of San José Diridon Station (37.3292, −121.9036) — <strong>5,279 parcels, ~1,420 acres</strong>.</p>
+<p>Both the 1-mile buffer and all areas are computed in <strong>California State Plane Zone 3 (EPSG:2227, US survey feet)</strong>, the data’s native projection and a locally accurate one. We deliberately do <em>not</em> buffer in Web Mercator (EPSG:3857): at Diridon’s latitude (~37.3°), Web Mercator inflates projected distances by 1/cos(lat) ≈ 1.26, so a “1-mile” (1,609 m) Web-Mercator buffer is really only ~0.8 mile on the ground. Using State Plane (1 mile = 5,280 ft) keeps the radius honest and avoids a bulk reprojection step that can fail on some PROJ installs.</p>
 </section>
 <section id="capacity" class="level2">
 <h2 class="anchored" data-anchor-id="capacity">Capacity</h2>
@@ -4136,40 +4141,41 @@ vertical-align: -.125em;
 </table>
 <p>San José’s urban-village districts generally set a <em>minimum</em> density; the <em>maximum</em> for UV/TR/UR is the top of the Table 20-136 range. Downtown (DC) density is governed by the Diridon Station Area Plan and the General Plan Downtown designation rather than a Title 20 du/ac figure.</p>
 </section>
-<section id="soft-sites-net-new-capacity" class="level2">
-<h2 class="anchored" data-anchor-id="soft-sites-net-new-capacity">Soft sites (net-new capacity)</h2>
+<section id="soft-sites-soft-site-capacity" class="level2">
+<h2 class="anchored" data-anchor-id="soft-sites-soft-site-capacity">Soft sites (soft-site capacity)</h2>
 <p>A <strong>soft site</strong> is a high-capacity parcel that is currently vacant, surface parking, or barely built — i.e., where new homes can realistically go. The ideal measure (assessor improvement-to-land value ratio) is <strong>not openly published</strong> for Santa Clara County; it is a paid bulk-data product. We therefore use an open, reproducible proxy: <strong>building-footprint coverage</strong> from OpenStreetMap. For each parcel we sum the footprint area of buildings clipped to the lot, divide by lot area, and flag parcels with <strong>&lt; 15% coverage</strong> as soft sites. Where OSM records <code>building:levels</code>, a rough built-FAR is also computed.</p>
-<p>This is an <em>underbuilt / vacant</em> proxy, not a true existing-FAR measure: it sees ground coverage, not floors. The 15% threshold is a choice; capacity is stable across reasonable thresholds:</p>
+<p>This is an <em>underbuilt / vacant</em> proxy, not a true existing-FAR measure: it sees ground coverage, not floors. “Soft-site capacity” is the <strong>gross zoned capacity on these underbuilt parcels</strong> — it is <em>not</em> net of the existing units already on them (most soft sites are non-residential — surface lots, parking, low-rise commercial — but we do not subtract existing units parcel by parcel). The 15% threshold is a choice; capacity is stable across reasonable thresholds:</p>
 <table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Coverage threshold</th>
-<th>Net-new soft-site capacity</th>
+<th>Soft-site capacity</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td>&lt; 5%</td>
-<td>≈ 29,500</td>
+<td>≈ 34,200</td>
 </tr>
 <tr class="even">
 <td>&lt; 10%</td>
-<td>≈ 31,200</td>
+<td>≈ 37,600</td>
 </tr>
 <tr class="odd">
 <td><strong>&lt; 15% (used)</strong></td>
-<td><strong>≈ 34,600</strong></td>
+<td><strong>≈ 42,500</strong></td>
 </tr>
 <tr class="even">
 <td>&lt; 20%</td>
-<td>≈ 41,500</td>
+<td>≈ 50,400</td>
 </tr>
 <tr class="odd">
 <td>&lt; 25%</td>
-<td>≈ 44,400</td>
+<td>≈ 53,900</td>
 </tr>
 </tbody>
 </table>
+<p><strong>Developability floor.</strong> About half of the soft-site capacity (~21,900 units, 219 of 351 parcels) sits on parcels with <em>zero</em> detected building footprint — some genuinely vacant or surface parking, some likely rail, station, or civic land carrying Downtown zoning. Excluding all zero-footprint parcels gives a conservative floor of <strong>≈ 20,600 units</strong>; the defensible range is therefore <strong>~20,600–42,500</strong>. A parcel-level ownership/use screen would tighten this.</p>
 </section>
 <section id="equity-displacement-vulnerability" class="level2">
 <h2 class="anchored" data-anchor-id="equity-displacement-vulnerability">Equity &amp; displacement vulnerability</h2>
@@ -4180,7 +4186,8 @@ vertical-align: -.125em;
 <li><strong>Transit-dependent</strong> — % households without a vehicle above the citywide median</li>
 <li><strong>Equity-priority</strong> — Equity Index score ≥ 4</li>
 </ul>
-<p><code>vulnerability_score</code> = sum of the four flags (0–4); a tract is <em>high vulnerability</em> at 3+. Net-new capacity is then attributed to each parcel’s tract.</p>
+<p><code>vulnerability_score</code> = sum of the four flags (0–4); a tract is <em>high vulnerability</em> at 3+ and <em>moderate</em> at 2. Soft-site capacity is then attributed to each parcel’s tract by GEOID.</p>
+<p>Two scope notes: (1) the “who lives here” profile uses <strong>whole tracts that intersect</strong> the 1-mile ring (population/housing-unit weighted), not tract populations clipped to the buffer — so it describes the surrounding neighborhoods, not only residents inside the exact ring. (2) “Transit-dependent” in the vulnerability score is operationalized as <strong>no-vehicle households</strong>; the memo separately reports transit-commute share as a descriptive statistic.</p>
 </section>
 <section id="caveats" class="level2">
 <h2 class="anchored" data-anchor-id="caveats">Caveats</h2>

@@ -12,5 +12,11 @@ _archived/
 __pycache__/
 *.pyc
 
+# secrets — never commit API keys (key lives in the macOS Keychain)
+.env
+.env.*
+*.key
+secrets*
+
 # local review notes (not for publication)
 code/notes.md

@@ -17,9 +17,6 @@ from functions import (
     # functions to load data
     load_parcels,
     load_zoning,
-    #load_railroad,
-    #load_bikeways,
-    #load_bike_racks,
     load_affordable_housing,
     load_equity_index,
     # functions for spatial join
@@ -66,16 +63,13 @@ def run_etl():
     # extract San Jose spatial data
     parcels = load_parcels()
     zoning = load_zoning()
-    #railroad = load_railroad()
-    #bikeways = load_bikeways()
-    #bikeracks = load_bike_racks()
     affordable = load_affordable_housing()
     equity = load_equity_index()
 
-    # extract census data
-    acs_raw = pull_acs_data(state="CA", year=2022)
-    tracts = pull_tracts(state="CA", year=2022)
-    places = pull_places(state="CA", year=2022)
+    # extract census data — ACS 2019-2023 5-year (year = end of the 5-year window)
+    acs_raw = pull_acs_data(state="CA", year=2023)
+    tracts = pull_tracts(state="CA", year=2023)
+    places = pull_places(state="CA", year=2023)
 
     # ======================
     #      TRANSFORM
@@ -120,21 +114,9 @@ def run_etl():
     # Attach tract-level ACS data to parcels
     # ----------------------------------------
     print("Attaching tract-level ACS data to parcels...")
-    tract_fields = [
-        "public_transit_pct",
-        "walked_pct",
-        "drove_pct",
-        "pct_renters",
-        "vacancy_rate",
-        "median_rent",
-        "median_income",
-        "pct_white",
-        "pct_black",
-        "pct_asian",
-        "pct_latino",
-        "pct_college_plus"
-    ]
-    parcels_with_tract_data = attach_tract_data_to_parcels(parcels_zoned, sj_acs, tract_fields=None) # change this
+    # tract_fields=None attaches all computed ACS indicators (the downstream
+    # equity analysis needs the full set: rent burden, no-vehicle, poverty, etc.).
+    parcels_with_tract_data = attach_tract_data_to_parcels(parcels_zoned, sj_acs, tract_fields=None)
     
     
     # ======================

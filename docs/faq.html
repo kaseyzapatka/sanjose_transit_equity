@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Methods &amp; Sources – Diridon Capacity &amp; Equity</title>
+<title>FAQ — anticipated reviewer questions – Diridon Capacity &amp; Equity</title>
 <style>
 
 code{white-space: pre-wrap;}
@@ -4015,11 +4015,11 @@ vertical-align: -.125em;
 <span class="menu-text">Interactive Map</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link active" href="./methods.html" aria-current="page"> 
+    <a class="nav-link" href="./methods.html"> 
 <span class="menu-text">Methods &amp; Sources</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./faq.html"> 
+    <a class="nav-link active" href="./faq.html" aria-current="page"> 
 <span class="menu-text">FAQ</span></a>
   </li>  
 </ul>
@@ -4047,13 +4047,11 @@ vertical-align: -.125em;
     <nav id="TOC" role="doc-toc" class="toc-active">
     <h2 id="toc-title">On this page</h2>
    
-  <ul>
-  <li><a href="#study-area" id="toc-study-area" class="nav-link active" data-scroll-target="#study-area">Study area</a></li>
-  <li><a href="#capacity" id="toc-capacity" class="nav-link" data-scroll-target="#capacity">Capacity</a></li>
-  <li><a href="#soft-sites-soft-site-capacity" id="toc-soft-sites-soft-site-capacity" class="nav-link" data-scroll-target="#soft-sites-soft-site-capacity">Soft sites (soft-site capacity)</a></li>
-  <li><a href="#equity-displacement-vulnerability" id="toc-equity-displacement-vulnerability" class="nav-link" data-scroll-target="#equity-displacement-vulnerability">Equity &amp; displacement vulnerability</a></li>
-  <li><a href="#caveats" id="toc-caveats" class="nav-link" data-scroll-target="#caveats">Caveats</a></li>
-  <li><a href="#data-sources" id="toc-data-sources" class="nav-link" data-scroll-target="#data-sources">Data sources</a></li>
+  <ul class="collapse">
+  <li><a href="#capacity" id="toc-capacity" class="nav-link active" data-scroll-target="#capacity">Capacity</a></li>
+  <li><a href="#soft-sites" id="toc-soft-sites" class="nav-link" data-scroll-target="#soft-sites">Soft sites</a></li>
+  <li><a href="#equity" id="toc-equity" class="nav-link" data-scroll-target="#equity">Equity</a></li>
+  <li><a href="#scope-feasibility" id="toc-scope-feasibility" class="nav-link" data-scroll-target="#scope-feasibility">Scope &amp; feasibility</a></li>
   <li><a href="#reproducibility" id="toc-reproducibility" class="nav-link" data-scroll-target="#reproducibility">Reproducibility</a></li>
   </ul>
 </nav>
@@ -4067,7 +4065,7 @@ vertical-align: -.125em;
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Methods &amp; Sources</h1>
+<h1 class="title">FAQ — anticipated reviewer questions</h1>
 </div>
 
 
@@ -4084,242 +4082,79 @@ vertical-align: -.125em;
 </header>
 
 
-<section id="study-area" class="level2">
-<h2 class="anchored" data-anchor-id="study-area">Study area</h2>
-<p>All analysis is restricted to parcels whose centroid falls within <strong>1 mile</strong> of San José Diridon Station (37.3292, −121.9036) — <strong>5,279 parcels, ~1,420 acres</strong>.</p>
-<p>Both the 1-mile buffer and all areas are computed in <strong>California State Plane Zone 3 (EPSG:2227, US survey feet)</strong>, the data’s native projection and a locally accurate one. We deliberately do <em>not</em> buffer in Web Mercator (EPSG:3857): at Diridon’s latitude (~37.3°), Web Mercator inflates projected distances by 1/cos(lat) ≈ 1.26, so a “1-mile” (1,609 m) Web-Mercator buffer is really only ~0.8 mile on the ground. Using State Plane (1 mile = 5,280 ft) keeps the radius honest and avoids a bulk reprojection step that can fail on some PROJ installs.</p>
-</section>
+<p>This page answers the questions a planner, economist, or hiring reviewer is most likely to press on. It is deliberately candid about what the analysis does and does not establish. Method detail and data lineage are on the <a href="./methods.html">Methods &amp; Sources</a> page.</p>
 <section id="capacity" class="level2">
 <h2 class="anchored" data-anchor-id="capacity">Capacity</h2>
-<p>For each parcel we compute <strong>theoretical zoned capacity</strong> = lot acreage × maximum dwelling units per acre.</p>
-<p><strong>Maximum densities</strong> come from the City’s own code, not assumptions:</p>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 33%">
-<col style="width: 33%">
-<col style="width: 33%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Zone</th>
-<th>Max du/ac</th>
-<th>Source</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Urban Village (UV), Transit Residential (TR)</td>
-<td>250</td>
-<td>Title 20, Table 20-136</td>
-</tr>
-<tr class="even">
-<td>Urban Residential (UR)</td>
-<td>95</td>
-<td>Title 20, Table 20-136</td>
-</tr>
-<tr class="odd">
-<td>Mixed-Use Commercial (MUC)</td>
-<td>50</td>
-<td>Title 20, Table 20-136</td>
-</tr>
-<tr class="even">
-<td>Mixed-Use Neighborhood (MUN)</td>
-<td>30</td>
-<td>Title 20, Table 20-136</td>
-</tr>
-<tr class="odd">
-<td>Urban Village Commercial (UVC)</td>
-<td>0 (no residential)</td>
-<td>Title 20, Table 20-136</td>
-</tr>
-<tr class="even">
-<td>Downtown (DC)</td>
-<td>350</td>
-<td>General Plan <em>Downtown</em> designation / DSAP (2021)</td>
-</tr>
-</tbody>
-</table>
-<p>San José’s urban-village districts generally set a <em>minimum</em> density; the <em>maximum</em> for UV/TR/UR is the top of the Table 20-136 range. Downtown (DC) density is governed by the Diridon Station Area Plan and the General Plan Downtown designation rather than a Title 20 du/ac figure.</p>
+<section id="is-soft-site-capacity-the-same-as-net-new-homes" class="level3">
+<h3 class="anchored" data-anchor-id="is-soft-site-capacity-the-same-as-net-new-homes">Is “soft-site capacity” the same as net-new homes?</h3>
+<p><strong>No — and the memo no longer calls it that.</strong> Soft-site capacity is the <em>gross zoned capacity</em> on parcels that are currently underbuilt (vacant, surface parking, or low-rise). It is <strong>not</strong> net of the existing units on those parcels. Most soft sites are non-residential (parking lots and low-rise commercial), so the subtraction would be small, but the honest framing is “zoned capacity on redevelopable land,” not “new units delivered.” A parcel-by-parcel subtraction of existing units is the right next refinement.</p>
 </section>
-<section id="soft-sites-soft-site-capacity" class="level2">
-<h2 class="anchored" data-anchor-id="soft-sites-soft-site-capacity">Soft sites (soft-site capacity)</h2>
-<p>A <strong>soft site</strong> is a high-capacity parcel that is currently vacant, surface parking, or barely built — i.e., where new homes can realistically go. The ideal measure (assessor improvement-to-land value ratio) is <strong>not openly published</strong> for Santa Clara County; it is a paid bulk-data product. We therefore use an open, reproducible proxy: <strong>building-footprint coverage</strong> from OpenStreetMap. For each parcel we sum the footprint area of buildings clipped to the lot, divide by lot area, and flag parcels with <strong>&lt; 15% coverage</strong> as soft sites. Where OSM records <code>building:levels</code>, a rough built-FAR is also computed.</p>
-<p>This is an <em>underbuilt / vacant</em> proxy, not a true existing-FAR measure: it sees ground coverage, not floors. “Soft-site capacity” is the <strong>gross zoned capacity on these underbuilt parcels</strong> — it is <em>not</em> net of the existing units already on them (most soft sites are non-residential — surface lots, parking, low-rise commercial — but we do not subtract existing units parcel by parcel). The 15% threshold is a choice; capacity is stable across reasonable thresholds:</p>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Coverage threshold</th>
-<th>Soft-site capacity</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>&lt; 5%</td>
-<td>≈ 34,200</td>
-</tr>
-<tr class="even">
-<td>&lt; 10%</td>
-<td>≈ 37,600</td>
-</tr>
-<tr class="odd">
-<td><strong>&lt; 15% (used)</strong></td>
-<td><strong>≈ 42,500</strong></td>
-</tr>
-<tr class="even">
-<td>&lt; 20%</td>
-<td>≈ 50,400</td>
-</tr>
-<tr class="odd">
-<td>&lt; 25%</td>
-<td>≈ 53,900</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Developability floor.</strong> About half of the soft-site capacity (~21,900 units, 219 of 351 parcels) sits on parcels with <em>zero</em> detected building footprint — some genuinely vacant or surface parking, some likely rail, station, or civic land carrying Downtown zoning. Excluding all zero-footprint parcels gives a conservative floor of <strong>≈ 20,600 units</strong>; the defensible range is therefore <strong>~20,600–42,500</strong>. A parcel-level ownership/use screen would tighten this.</p>
-<p><strong>Top soft sites (audit).</strong> The largest soft sites driving the total are listed below so a reviewer can judge developability directly (full list: <code>output/tables/top_soft_sites.csv</code>). All are Downtown (DC) except where noted; “verify” marks zero-footprint parcels that need an ownership/use check.</p>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Parcel ID</th>
-<th>APN</th>
-<th>Zone</th>
-<th style="text-align: right;">Acres</th>
-<th style="text-align: right;">Built coverage</th>
-<th style="text-align: right;">Capacity</th>
-<th>Note</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>579060</td>
-<td>25923024</td>
-<td>DC</td>
-<td style="text-align: right;">9.5</td>
-<td style="text-align: right;">0.1%</td>
-<td style="text-align: right;">3,329</td>
-<td>underbuilt</td>
-</tr>
-<tr class="even">
-<td>44410</td>
-<td>25927027</td>
-<td>DC</td>
-<td style="text-align: right;">6.8</td>
-<td style="text-align: right;">11.1%</td>
-<td style="text-align: right;">2,394</td>
-<td>underbuilt</td>
-</tr>
-<tr class="odd">
-<td>342811</td>
-<td>25928041</td>
-<td>DC</td>
-<td style="text-align: right;">5.4</td>
-<td style="text-align: right;">0.0%</td>
-<td style="text-align: right;">1,872</td>
-<td>verify</td>
-</tr>
-<tr class="even">
-<td>1000002155</td>
-<td>25938142</td>
-<td>DC</td>
-<td style="text-align: right;">4.4</td>
-<td style="text-align: right;">0.0%</td>
-<td style="text-align: right;">1,532</td>
-<td>verify</td>
-</tr>
-<tr class="odd">
-<td>47117</td>
-<td>26135027</td>
-<td>DC</td>
-<td style="text-align: right;">4.3</td>
-<td style="text-align: right;">0.0%</td>
-<td style="text-align: right;">1,492</td>
-<td>verify</td>
-</tr>
-<tr class="even">
-<td>1000026169</td>
-<td>25942086</td>
-<td>DC</td>
-<td style="text-align: right;">2.5</td>
-<td style="text-align: right;">0.2%</td>
-<td style="text-align: right;">886</td>
-<td>underbuilt</td>
-</tr>
-<tr class="odd">
-<td>44823</td>
-<td>25941…</td>
-<td>DC</td>
-<td style="text-align: right;">2.1</td>
-<td style="text-align: right;">0.5%</td>
-<td style="text-align: right;">722</td>
-<td>underbuilt</td>
-</tr>
-<tr class="even">
-<td>363884</td>
-<td>25928045</td>
-<td>DC</td>
-<td style="text-align: right;">1.8</td>
-<td style="text-align: right;">0.4%</td>
-<td style="text-align: right;">632</td>
-<td>underbuilt</td>
-</tr>
-<tr class="odd">
-<td>47118</td>
-<td>26135014</td>
-<td>DC</td>
-<td style="text-align: right;">1.8</td>
-<td style="text-align: right;">0.0%</td>
-<td style="text-align: right;">618</td>
-<td>verify</td>
-</tr>
-<tr class="even">
-<td>1000002078</td>
-<td>46746080</td>
-<td>DC</td>
-<td style="text-align: right;">1.7</td>
-<td style="text-align: right;">13.8%</td>
-<td style="text-align: right;">610</td>
-<td>underbuilt</td>
-</tr>
-</tbody>
-</table>
-<p>The largest sites are small (1–10 acres) and concentrated in the Downtown core; five of the top fifteen are zero-footprint parcels flagged for verification.</p>
+<section id="why-apply-a-uniform-350-duac-to-the-whole-downtown-core" class="level3">
+<h3 class="anchored" data-anchor-id="why-apply-a-uniform-350-duac-to-the-whole-downtown-core">Why apply a uniform 350 du/ac to the whole Downtown core?</h3>
+<p>350 du/ac is the maximum of the General Plan <strong>Downtown</strong> land-use designation, which governs the DC zone (the Diridon Station Area Plan sits on top of it). It is a <strong>ceiling, not a typical yield</strong>: height limits, FAR, FAA/airport one-engine-out surfaces, historic districts, parking/loading, and tower-spacing rules will often bind <em>before</em> 350 du/ac does. That is exactly why every number is labeled <em>theoretical zoned capacity</em> and why the soft-site figure — not the 120,000 gross — is the one the memo leads with. A height/FAR-aware envelope would lower the Downtown number and is the natural next step.</p>
 </section>
-<section id="equity-displacement-vulnerability" class="level2">
-<h2 class="anchored" data-anchor-id="equity-displacement-vulnerability">Equity &amp; displacement vulnerability</h2>
-<p>Tract indicators are from the <strong>ACS 2022 5-year</strong> estimates, joined to the City’s official <strong>Equity Index</strong> (1–5; higher = higher priority). For the 1-mile station-area tracts we build a transparent, flag-based vulnerability measure, with cut-points set at the <strong>citywide median</strong> so they are defensible rather than arbitrary:</p>
-<ul>
-<li><strong>Renter-majority</strong> — % renters above the citywide median</li>
-<li><strong>Rent-burdened</strong> — % rent-burdened renters above the citywide median</li>
-<li><strong>Transit-dependent</strong> — % households without a vehicle above the citywide median</li>
-<li><strong>Equity-priority</strong> — Equity Index score ≥ 4</li>
-</ul>
-<p><code>vulnerability_score</code> = sum of the four flags (0–4); a tract is <em>high vulnerability</em> at 3+ and <em>moderate</em> at 2. Soft-site capacity is then attributed to each parcel’s tract by GEOID.</p>
-<p>Two scope notes: (1) the “who lives here” profile uses <strong>whole tracts that intersect</strong> the 1-mile ring (population/housing-unit weighted), not tract populations clipped to the buffer — so it describes the surrounding neighborhoods, not only residents inside the exact ring. (2) “Transit-dependent” in the vulnerability score is operationalized as <strong>no-vehicle households</strong>; the memo separately reports transit-commute share as a descriptive statistic.</p>
+<section id="how-are-planned-development-pd-parcels-handled" class="level3">
+<h3 class="anchored" data-anchor-id="how-are-planned-development-pd-parcels-handled">How are Planned-Development <code>(PD)</code> parcels handled?</h3>
+<p>Each parcel’s zoning is stripped of its <code>(PD)</code>/<code>(CL)</code> overlay to its base district (e.g., <code>DC(PD)</code> → <code>DC</code>). I checked whether the approved PD densities (<code>PDDENSITY</code>) could be used instead: within the station area they are <strong>null or zero for every target parcel</strong> (including all 101 <code>DC(PD)</code> parcels), so the base General-Plan/Title 20 maximums are the only available basis. Where a city later publishes site-specific PD entitlements, those should override the lookup.</p>
 </section>
-<section id="caveats" class="level2">
-<h2 class="anchored" data-anchor-id="caveats">Caveats</h2>
-<ul>
-<li><strong>Theoretical, not a forecast.</strong> Zoned capacity is an upper bound on what the code permits, not a prediction of what will be built. Market feasibility, parcel assembly, and entitlement are out of scope.</li>
-<li><strong>Soft sites are a proxy.</strong> Footprint coverage flags underbuilt land but cannot distinguish a developable surface lot from a civic/transport parcel or protected open space; some zero-coverage parcels (e.g., the station and rail right-of-way) inflate the gross Downtown figure and are why the net number is treated as a ceiling.</li>
-<li><strong>Vulnerability ≠ predicted displacement.</strong> The flags identify exposure, not outcomes.</li>
-<li><strong>ACS margins of error</strong> apply to all tract estimates, especially small tracts.</li>
-</ul>
+<section id="why-include-downtown-but-exclude-r-m-and-other-residential-zones" class="level3">
+<h3 class="anchored" data-anchor-id="why-include-downtown-but-exclude-r-m-and-other-residential-zones">Why include Downtown but exclude <code>R-M</code> and other residential zones?</h3>
+<p>The question the memo asks is <em>where the station-area upzoning lever is</em> — and that is the Downtown core plus the mixed-use/urban-village districts. Lower- density residential zones like <code>R-M</code> are largely built out and are not where a TOD capacity debate plays out, so including them would add existing-neighborhood capacity that dilutes the station-area story. It would be a reasonable sensitivity to add; it does not change the finding that Downtown dominates.</p>
 </section>
-<section id="data-sources" class="level2">
-<h2 class="anchored" data-anchor-id="data-sources">Data sources</h2>
-<ul>
-<li>City of San José Open Data — parcels, zoning districts, Equity Index census tracts, affordable rental housing (<a href="https://data.sanjoseca.gov" class="uri">https://data.sanjoseca.gov</a>)</li>
-<li>San José Municipal Code <strong>Title 20</strong> (Zoning), Ch. 20.55, Table 20-136</li>
-<li><strong>Diridon Station Area Plan</strong> (amended 2021) &amp; General Plan land use designations</li>
-<li><strong>ACS 2022 5-year</strong> estimates via <code>pygris</code> / Census API</li>
-<li><strong>OpenStreetMap</strong> building footprints (© OpenStreetMap contributors, ODbL)</li>
-</ul>
+<section id="is-uvc-really-zero-residential-capacity" class="level3">
+<h3 class="anchored" data-anchor-id="is-uvc-really-zero-residential-capacity">Is <code>UVC</code> really zero residential capacity?</h3>
+<p>Yes — under Title 20 Table 20-136, the Urban Village Commercial district does not permit stand-alone residential, so it contributes 0 to residential capacity. It is retained in the parcel set for completeness and shows as 0.</p>
+</section>
+</section>
+<section id="soft-sites" class="level2">
+<h2 class="anchored" data-anchor-id="soft-sites">Soft sites</h2>
+<section id="why-footprint-coverage-instead-of-assessor-improvement-to-land-ratio" class="level3">
+<h3 class="anchored" data-anchor-id="why-footprint-coverage-instead-of-assessor-improvement-to-land-ratio">Why footprint coverage instead of assessor improvement-to-land ratio?</h3>
+<p>The improvement-to-land ratio is the textbook soft-site measure, but Santa Clara County <strong>does not publish parcel-level assessed values</strong> — they are a paid bulk-data product. Building-footprint coverage from OpenStreetMap is the open, fully reproducible substitute. The <a href="./methods.html">Methods</a> page shows the soft-site total is stable across coverage thresholds (≈34.2k–53.9k from 5%–25%).</p>
+</section>
+<section id="could-non-developable-land-rail-the-station-civic-parks-inflate-the-number" class="level3">
+<h3 class="anchored" data-anchor-id="could-non-developable-land-rail-the-station-civic-parks-inflate-the-number">Could non-developable land (rail, the station, civic, parks) inflate the number?</h3>
+<p>Partly, and this is the figure’s main weakness. Parks, public/quasi-public, and agricultural zones (<code>OS</code>, <code>PQP</code>, <code>A</code>) are <strong>already excluded</strong> — they are not housing-permitting zones, so they never enter the capacity set. The residual risk is large <strong><code>DC</code>-zoned</strong> parcels that are functionally rail right-of-way, the station, or other civic uses but carry Downtown zoning: <strong>219 of 351 soft sites have zero detected building coverage (~21,900 units — about half the soft-site total)</strong>, and the largest few are multi-acre Downtown parcels. Excluding every zero-footprint parcel gives a conservative floor of <strong>≈ 20,600 units</strong>, so the defensible range is <strong>~20,600–42,500</strong>. A parcel-level ownership/use screen (civic/rail, active entitlements) would tighten this; until then the memo reports the range and treats the Downtown figure as a ceiling. The <a href="./methods.html">Methods page</a> lists the <strong>top soft sites</strong> with their coverage and a verify/underbuilt flag so the parcels driving the total can be checked directly.</p>
+</section>
+<section id="is-42-vacant-or-surface-parking-a-verified-land-use-statistic" class="level3">
+<h3 class="anchored" data-anchor-id="is-42-vacant-or-surface-parking-a-verified-land-use-statistic">Is “42% vacant or surface parking” a verified land-use statistic?</h3>
+<p>No. It is <strong>~38% of Downtown’s zoned land with less than 15% building coverage</strong> — inferred underbuilt land, not classified land use. The memo now says “underbuilt” and names parking/vacant lots as the likely composition rather than asserting a verified land-use split.</p>
+</section>
+<section id="how-complete-is-openstreetmap-downtown-and-what-if-footprints-are-missing" class="level3">
+<h3 class="anchored" data-anchor-id="how-complete-is-openstreetmap-downtown-and-what-if-footprints-are-missing">How complete is OpenStreetMap downtown, and what if footprints are missing?</h3>
+<p>OSM building coverage in downtown San José is strong, but it is not perfect. Missing footprints would <em>over</em>-count soft sites (a built parcel read as empty) — which pushes in the <strong>same direction</strong> as the non-developable-land issue above. Both are reasons the soft-site capacity is best read as an upper bound rather than a point estimate.</p>
+</section>
+</section>
+<section id="equity" class="level2">
+<h2 class="anchored" data-anchor-id="equity">Equity</h2>
+<section id="are-the-demographics-for-residents-inside-the-1-mile-ring-or-whole-tracts" class="level3">
+<h3 class="anchored" data-anchor-id="are-the-demographics-for-residents-inside-the-1-mile-ring-or-whole-tracts">Are the demographics for residents inside the 1-mile ring, or whole tracts?</h3>
+<p><strong>Whole census tracts that intersect the ring</strong>, weighted by occupied housing units — so the profile describes the surrounding neighborhoods, not only the population strictly inside the circle. Tracts are coarser than the parcel buffer; apportioning ACS to the buffer is possible but adds false precision to margin-of-error-laden estimates.</p>
+</section>
+<section id="could-a-high-income-renter-heavy-downtown-tract-get-flagged-vulnerable" class="level3">
+<h3 class="anchored" data-anchor-id="could-a-high-income-renter-heavy-downtown-tract-get-flagged-vulnerable">Could a high-income, renter-heavy Downtown tract get flagged “vulnerable”?</h3>
+<p>Yes — the renter and no-vehicle flags can fire in an affluent downtown tract. That is why vulnerability uses <strong>four</strong> flags including the City’s own Equity Index (which encodes income, race, language, and education), and why the memo reports that only ~4% of soft-site capacity sits in the <em>highest</em> (3+) tracts — the rest splits between lower- and moderate-vulnerability tracts. The score measures <strong>exposure</strong>, not a prediction of displacement.</p>
+</section>
+<section id="which-acs-vintage-is-this-and-is-it-current" class="level3">
+<h3 class="anchored" data-anchor-id="which-acs-vintage-is-this-and-is-it-current">Which ACS vintage is this, and is it current?</h3>
+<p>The figures are from the <strong>ACS 2019–2023 5-year</strong> estimates (<code>year=2023</code>), the most recent 5-year release. The Census data API requires a key, read at runtime from the <code>CENSUS_API_KEY</code> environment variable or the macOS Keychain and never written to disk. The <em>structural</em> facts the memo relies on — a renter-majority, transit-dependent downtown — move slowly across ACS vintages.</p>
+</section>
+</section>
+<section id="scope-feasibility" class="level2">
+<h2 class="anchored" data-anchor-id="scope-feasibility">Scope &amp; feasibility</h2>
+<section id="where-is-the-pro-forma-financial-feasibility" class="level3">
+<h3 class="anchored" data-anchor-id="where-is-the-pro-forma-financial-feasibility">Where is the pro forma / financial feasibility?</h3>
+<p>Out of scope, by design. This is a <strong>capacity and equity screen</strong>, not a feasibility study. It answers “where could homes go and who lives there,” not “what penciling rents, construction costs, parking, impact fees, and inclusionary requirements would make a given site build.” A residual-land-value or achievable-density sensitivity is the natural next phase and would pair well with the soft-site list.</p>
+</section>
 </section>
 <section id="reproducibility" class="level2">
 <h2 class="anchored" data-anchor-id="reproducibility">Reproducibility</h2>
-<p>The full pipeline is three Python modules run in order: <code>code/02_diridon_capacity.py</code> → <code>code/03_diridon_equity.py</code> → <code>code/04_diridon_figures.py</code> (+ <code>code/05_diridon_interactive.py</code>). Each writes its outputs to <code>output/tables/</code> and <code>output/maps/</code>, which this memo reads.</p>
+<section id="can-a-reviewer-regenerate-these-numbers" class="level3">
+<h3 class="anchored" data-anchor-id="can-a-reviewer-regenerate-these-numbers">Can a reviewer regenerate these numbers?</h3>
+<p>Yes. <code>environment.yml</code> pins the spatial stack; the four scripts run in order (<code>02</code>→<code>05</code>) from <code>code/</code>. The pipeline now <strong>fails fast</strong> — it asserts the station selection returns the expected order of magnitude (≈5,279 parcels in 1 mile, ≈1,199 housing-permitting parcels, ≈13 tracts) and writes outputs <strong>atomically</strong> (temp file → replace), so a bad run cannot silently overwrite good outputs. Generated tables/figures are committed so the published memo is always traceable to a specific pipeline run.</p>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->

@@ -6,7 +6,7 @@
 #
 # Combines:
 #   - San Jose Equity Index (official 1-5 priority score; higher = higher need)
-#   - ACS 2022 5-yr tract indicators (renters, rent burden, poverty,
+#   - ACS 2019–2023 5-yr tract indicators (renters, rent burden, poverty,
 #     no-vehicle / transit dependence, income)
 #   - The soft-site capacity layer from diridon_capacity.py
 #

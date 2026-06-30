@@ -100,7 +100,7 @@ def hero_map():
     fig.text(0.5, 0.025,
              "Capacity parcels = zones permitting housing (Downtown DC + UV/TR/UR/MUC/MUN); "
              "soft sites <15% lot coverage in OSM footprints.\n"
-             "Sources: San Jose parcels & zoning; Title 20 / DSAP; ACS 2022 5-yr; "
+             "Sources: San Jose parcels & zoning; Title 20 / DSAP; ACS 2019–2023 5-yr; "
              "San Jose Equity Index; OpenStreetMap.",
              ha="center", va="top", fontsize=7.5, color=vs.MUTE)
     fig.subplots_adjust(bottom=0.13)
@@ -177,7 +177,7 @@ def who_lives_here():
     ax.margins(x=0.12)
     fig.text(0.01, -0.02,
              "Population-weighted tract averages within 1 mile vs all San Jose tracts. "
-             "Source: ACS 2022 5-year estimates.", fontsize=7.5, color=vs.MUTE)
+             "Source: ACS 2019–2023 5-year estimates.", fontsize=7.5, color=vs.MUTE)
     return vs.save(fig, "who_lives_here", FIGS)
 
 

@@ -21,7 +21,7 @@ context. Toggle layers at top-right.
 ```
 
 ::: {.callout-note appearance="minimal"}
-Sources: City of San José parcels, zoning, and Equity Index; ACS 2022 5-year
+Sources: City of San José parcels, zoning, and Equity Index; ACS 2019–2023 5-year
 estimates; OpenStreetMap building footprints. Capacity is theoretical zoned
 capacity, not a production forecast — see [Methods & Sources](methods.qmd).
 :::

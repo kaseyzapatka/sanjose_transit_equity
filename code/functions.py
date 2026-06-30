@@ -12,6 +12,7 @@
 
 # for data management
 import os
+import subprocess
 import geopandas as gpd
 import pandas as pd
 # for data visualization 
@@ -270,8 +271,35 @@ from pygris.data import get_census
 #
 # 1. Get Census data
 # ----------------------------------------
-def pull_acs_data(state="CA", year=2022):
-    """Pull ACS 5-year data for a given state."""
+def _census_api_key():
+    """Return the Census API key without ever writing it to disk or git.
+
+    Reads the CENSUS_API_KEY environment variable, then falls back to the macOS
+    Keychain item named 'CENSUS_API_KEY'. Store it once (in your own terminal):
+
+        security add-generic-password -s CENSUS_API_KEY -a "$USER" -U -w
+
+    The key is fetched inside this process at runtime and is never printed.
+    """
+    key = os.environ.get("CENSUS_API_KEY")
+    if key:
+        return key.strip()
+    try:
+        out = subprocess.run(
+            ["security", "find-generic-password", "-s", "CENSUS_API_KEY", "-w"],
+            capture_output=True, text=True, check=True,
+        )
+        return out.stdout.strip() or None
+    except Exception:
+        return None
+
+
+def pull_acs_data(state="CA", year=2023):
+    """Pull ACS 5-year data for a given state (year = end of the 5-year window;
+    e.g. 2023 -> the 2019-2023 ACS 5-year estimates).
+
+    The Census data API requires a key; it is read from the environment or the
+    macOS Keychain via _census_api_key() and is never written to disk."""
     acs_vars = {
         "median_age": "B01002_001E",
         "median_income": "B19013_001E",
@@ -352,11 +380,20 @@ def pull_acs_data(state="CA", year=2022):
         "gini": "B19083_001E"
     }
 
+    params = {"for": "tract:*", "in": f"state:{validate_state(state)}"}
+    key = _census_api_key()
+    if not key:
+        raise RuntimeError(
+            "Census API key not found. Set CENSUS_API_KEY or store it in the "
+            "macOS Keychain (service 'CENSUS_API_KEY'); the ACS data API requires it."
+        )
+    params["key"] = key  # required by the Census data API
+
     df = get_census(
         dataset="acs/acs5",
         variables=list(acs_vars.values()),
         year=year,
-        params={"for": "tract:*", "in": f"state:{validate_state(state)}"},
+        params=params,
         guess_dtypes=True,
         return_geoid=True
     )
@@ -427,11 +464,11 @@ def compute_acs_indicators(df):
 #
 # 3. Pull tracts and places
 # ----------------------------------------
-def pull_tracts(state="CA", year=2022):
+def pull_tracts(state="CA", year=2023):
     return tracts(state=state, cb=True, year=year, cache=True)
 
 
-def pull_places(state="CA", year=2022):
+def pull_places(state="CA", year=2023):
     return places(state=state, cb=True, year=year, cache=True)
 
 #

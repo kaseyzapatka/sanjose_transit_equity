@@ -16,7 +16,7 @@ PDF memo**.
   (vacant lots / surface parking) — **~38% of Downtown's zoned land** is
   underbuilt today — with a conservative **≈ 20,600** floor after excluding all
   zero-footprint parcels. (Gross capacity on redevelopable land, not net of existing units.)
-- The station area is **68% renters** and **~2× as transit-dependent** as the
+- The station area is **69% renters** and **~2× as transit-dependent** as the
   city, so the recommendation pairs upzoning with anti-displacement tools.
 
 ## Environment
@@ -30,6 +30,16 @@ conda activate sanjose_transit_equity
 ```
 
 (or `pip install -r requirements.txt` into a clean Python 3.13 env).
+
+The Census data API requires a key. Store it once (never committed; read at
+runtime from the env var or the macOS Keychain):
+
+```bash
+security add-generic-password -s CENSUS_API_KEY -a "$USER" -U -w   # paste key at prompt
+```
+
+To refresh the ACS demographics to a newer 5-year vintage without re-running the
+full ETL: `python code/refresh_acs.py` (set `YEAR` in that file).
 
 ## Pipeline
 
@@ -52,9 +62,9 @@ writes outputs atomically, so a bad run cannot silently overwrite good tables.
 
 ## Build the memo + site
 
-The site is a Quarto website rendered to `docs/` (served by GitHub Pages). A
-post-render hook produces the PDF via Quarto's bundled **Typst** (no LaTeX
-needed):
+The site is a Quarto website ([Quarto](https://quarto.org) ≥ 1.4) rendered to
+`docs/` (served by GitHub Pages). A post-render hook produces the PDF via
+Quarto's bundled **Typst** (no LaTeX needed):
 
 ```bash
 quarto render        # builds docs/ (HTML site) + docs/diridon_capacity_equity_memo.pdf
@@ -69,17 +79,11 @@ Pages: repository **Settings → Pages → Deploy from branch → `main` / `docs
   tracts, affordable rental housing (<https://data.sanjoseca.gov/organization/maps-data>)
 - San José Municipal Code **Title 20** (Zoning), Ch. 20.55, Table 20-136
 - **Diridon Station Area Plan** (amended 2021) and General Plan land use designations
-- **ACS 2022** 5-year estimates via `pygris` / Census API
+- **ACS 2019–2023** 5-year estimates via `pygris` / Census API
 - **OpenStreetMap** building footprints (© OpenStreetMap contributors, ODbL)
 
 Large data files are kept off GitHub; download them here:
 <https://drive.google.com/drive/folders/1rM17LTuIoiBh7mqlefV8dIxEGZeKY9fc?usp=sharing>
-
-## Environment
-
-Python 3.13 with `geopandas`, `pygris`, `folium`, `matplotlib`, `seaborn`,
-`pyarrow`, `requests`. See `requirements.txt`. Rendering the site additionally
-requires [Quarto](https://quarto.org) ≥ 1.4.
 
 ## Repository layout
 
@@ -87,6 +91,7 @@ requires [Quarto](https://quarto.org) ≥ 1.4.
 code/                     analysis modules (capacity, equity, figures, interactive) + ETL
   pipeline_utils.py       fail-fast checks + atomic writes shared by the pipeline
   check_outputs.py        one-command smoke test (counts + table consistency)
+  refresh_acs.py          refresh the ACS tract layer to a new 5-year vintage
 data/processed/           processed parcels, zoning, tracts, equity (off-GitHub)
 output/figures/           static figures (PNG + PDF)
 output/tables/            capacity & equity summary tables (CSV)

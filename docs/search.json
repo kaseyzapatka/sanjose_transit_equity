@@ -1,5 +1,110 @@
 [
   {
+    "objectID": "faq.html",
+    "href": "faq.html",
+    "title": "FAQ — anticipated reviewer questions",
+    "section": "",
+    "text": "This page answers the questions a planner, economist, or hiring reviewer is most likely to press on. It is deliberately candid about what the analysis does and does not establish. Method detail and data lineage are on the Methods & Sources page."
+  },
+  {
+    "objectID": "faq.html#capacity",
+    "href": "faq.html#capacity",
+    "title": "FAQ — anticipated reviewer questions",
+    "section": "Capacity",
+    "text": "Capacity\n\nIs “soft-site capacity” the same as net-new homes?\nNo — and the memo no longer calls it that. Soft-site capacity is the gross zoned capacity on parcels that are currently underbuilt (vacant, surface parking, or low-rise). It is not net of the existing units on those parcels. Most soft sites are non-residential (parking lots and low-rise commercial), so the subtraction would be small, but the honest framing is “zoned capacity on redevelopable land,” not “new units delivered.” A parcel-by-parcel subtraction of existing units is the right next refinement.\n\n\nWhy apply a uniform 350 du/ac to the whole Downtown core?\n350 du/ac is the maximum of the General Plan Downtown land-use designation, which governs the DC zone (the Diridon Station Area Plan sits on top of it). It is a ceiling, not a typical yield: height limits, FAR, FAA/airport one-engine-out surfaces, historic districts, parking/loading, and tower-spacing rules will often bind before 350 du/ac does. That is exactly why every number is labeled theoretical zoned capacity and why the soft-site figure — not the 120,000 gross — is the one the memo leads with. A height/FAR-aware envelope would lower the Downtown number and is the natural next step.\n\n\nHow are Planned-Development (PD) parcels handled?\nEach parcel’s zoning is stripped of its (PD)/(CL) overlay to its base district (e.g., DC(PD) → DC). I checked whether the approved PD densities (PDDENSITY) could be used instead: within the station area they are null or zero for every target parcel (including all 101 DC(PD) parcels), so the base General-Plan/Title 20 maximums are the only available basis. Where a city later publishes site-specific PD entitlements, those should override the lookup.\n\n\nWhy include Downtown but exclude R-M and other residential zones?\nThe question the memo asks is where the station-area upzoning lever is — and that is the Downtown core plus the mixed-use/urban-village districts. Lower- density residential zones like R-M are largely built out and are not where a TOD capacity debate plays out, so including them would add existing-neighborhood capacity that dilutes the station-area story. It would be a reasonable sensitivity to add; it does not change the finding that Downtown dominates.\n\n\nIs UVC really zero residential capacity?\nYes — under Title 20 Table 20-136, the Urban Village Commercial district does not permit stand-alone residential, so it contributes 0 to residential capacity. It is retained in the parcel set for completeness and shows as 0."
+  },
+  {
+    "objectID": "faq.html#soft-sites",
+    "href": "faq.html#soft-sites",
+    "title": "FAQ — anticipated reviewer questions",
+    "section": "Soft sites",
+    "text": "Soft sites\n\nWhy footprint coverage instead of assessor improvement-to-land ratio?\nThe improvement-to-land ratio is the textbook soft-site measure, but Santa Clara County does not publish parcel-level assessed values — they are a paid bulk-data product. Building-footprint coverage from OpenStreetMap is the open, fully reproducible substitute. The Methods page shows the soft-site total is stable across coverage thresholds (≈34.2k–53.9k from 5%–25%).\n\n\nCould non-developable land (rail, the station, civic, parks) inflate the number?\nPartly, and this is the figure’s main weakness. Parks, public/quasi-public, and agricultural zones (OS, PQP, A) are already excluded — they are not housing-permitting zones, so they never enter the capacity set. The residual risk is large DC-zoned parcels that are functionally rail right-of-way, the station, or other civic uses but carry Downtown zoning: 219 of 351 soft sites have zero detected building coverage (~21,900 units — about half the soft-site total), and the largest few are multi-acre Downtown parcels. Excluding every zero-footprint parcel gives a conservative floor of ≈ 20,600 units, so the defensible range is ~20,600–42,500. A parcel-level ownership/use screen (civic/rail, active entitlements) would tighten this; until then the memo reports the range and treats the Downtown figure as a ceiling. The Methods page lists the top soft sites with their coverage and a verify/underbuilt flag so the parcels driving the total can be checked directly.\n\n\nIs “42% vacant or surface parking” a verified land-use statistic?\nNo. It is ~38% of Downtown’s zoned land with less than 15% building coverage — inferred underbuilt land, not classified land use. The memo now says “underbuilt” and names parking/vacant lots as the likely composition rather than asserting a verified land-use split.\n\n\nHow complete is OpenStreetMap downtown, and what if footprints are missing?\nOSM building coverage in downtown San José is strong, but it is not perfect. Missing footprints would over-count soft sites (a built parcel read as empty) — which pushes in the same direction as the non-developable-land issue above. Both are reasons the soft-site capacity is best read as an upper bound rather than a point estimate."
+  },
+  {
+    "objectID": "faq.html#equity",
+    "href": "faq.html#equity",
+    "title": "FAQ — anticipated reviewer questions",
+    "section": "Equity",
+    "text": "Equity\n\nAre the demographics for residents inside the 1-mile ring, or whole tracts?\nWhole census tracts that intersect the ring, weighted by occupied housing units — so the profile describes the surrounding neighborhoods, not only the population strictly inside the circle. Tracts are coarser than the parcel buffer; apportioning ACS to the buffer is possible but adds false precision to margin-of-error-laden estimates.\n\n\nCould a high-income, renter-heavy Downtown tract get flagged “vulnerable”?\nYes — the renter and no-vehicle flags can fire in an affluent downtown tract. That is why vulnerability uses four flags including the City’s own Equity Index (which encodes income, race, language, and education), and why the memo reports that only ~4% of soft-site capacity sits in the highest (3+) tracts — the rest splits between lower- and moderate-vulnerability tracts. The score measures exposure, not a prediction of displacement.\n\n\nWhich ACS vintage is this, and is it current?\nThe figures are from the ACS 2019–2023 5-year estimates (year=2023), the most recent 5-year release. The Census data API requires a key, read at runtime from the CENSUS_API_KEY environment variable or the macOS Keychain and never written to disk. The structural facts the memo relies on — a renter-majority, transit-dependent downtown — move slowly across ACS vintages."
+  },
+  {
+    "objectID": "faq.html#scope-feasibility",
+    "href": "faq.html#scope-feasibility",
+    "title": "FAQ — anticipated reviewer questions",
+    "section": "Scope & feasibility",
+    "text": "Scope & feasibility\n\nWhere is the pro forma / financial feasibility?\nOut of scope, by design. This is a capacity and equity screen, not a feasibility study. It answers “where could homes go and who lives there,” not “what penciling rents, construction costs, parking, impact fees, and inclusionary requirements would make a given site build.” A residual-land-value or achievable-density sensitivity is the natural next phase and would pair well with the soft-site list."
+  },
+  {
+    "objectID": "faq.html#reproducibility",
+    "href": "faq.html#reproducibility",
+    "title": "FAQ — anticipated reviewer questions",
+    "section": "Reproducibility",
+    "text": "Reproducibility\n\nCan a reviewer regenerate these numbers?\nYes. environment.yml pins the spatial stack; the four scripts run in order (02→05) from code/. The pipeline now fails fast — it asserts the station selection returns the expected order of magnitude (≈5,279 parcels in 1 mile, ≈1,199 housing-permitting parcels, ≈13 tracts) and writes outputs atomically (temp file → replace), so a bad run cannot silently overwrite good outputs. Generated tables/figures are committed so the published memo is always traceable to a specific pipeline run."
+  },
+  {
+    "objectID": "map.html",
+    "href": "map.html",
+    "title": "Interactive station-area map",
+    "section": "",
+    "text": "Explore the 1-mile Diridon station area parcel by parcel. Tracts are shaded by displacement-vulnerability score (renter share, rent burden, transit dependence, and the City’s Equity Index). Parcels that permit housing sit on top — coral marks soft sites (underbuilt, high-capacity lots where new homes can realistically go); grey marks already-built capacity parcels. Hover any feature for its zoning, capacity, footprint coverage, and neighborhood context. Toggle layers at top-right.\n\n\n\n\n\n\n\n\nSources: City of San José parcels, zoning, and Equity Index; ACS 2022 5-year estimates; OpenStreetMap building footprints. Capacity is theoretical zoned capacity, not a production forecast — see Methods & Sources."
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Housing Capacity and Equity Around Diridon Station",
+    "section": "",
+    "text": "Bottom line. Within one mile of Diridon Station, San José’s zoning permits a theoretical ≈ 120,000 homes — but the lever that matters is the Downtown core, which holds ~88% of that capacity and where roughly 38% of the zoned land is underbuilt (largely surface parking and vacant lots). The zoned capacity on those underbuilt “soft sites” is ≈ 42,500 homes — or a conservative ≈ 20,600 if every zero-footprint parcel (some of which may be rail or civic land) is set aside. Either way it is a large supply beside the region’s marquee transit hub, in a neighborhood that is 69% renters and twice as transit-dependent as the rest of the city — so capacity should be paired with anti-displacement and inclusionary tools, not unlocked on its own."
+  },
+  {
+    "objectID": "index.html#the-question",
+    "href": "index.html#the-question",
+    "title": "Housing Capacity and Equity Around Diridon Station",
+    "section": "The question",
+    "text": "The question\nDiridon is the San Francisco Bay Area’s flagship transit-oriented development site: the future convergence of BART’s Silicon Valley extension, California High-Speed Rail, Caltrain, and Google’s “Downtown West.” It is exactly the kind of station area where regions hope to concentrate new housing. Two questions decide whether that hope is realistic:\n\nCapacity — does the zoning actually permit enough housing near the station, and how much of it is on land that could realistically redevelop?\nEquity — who lives there now, and would adding homes put them at risk?"
+  },
+  {
+    "objectID": "index.html#approach",
+    "href": "index.html#approach",
+    "title": "Housing Capacity and Equity Around Diridon Station",
+    "section": "Approach",
+    "text": "Approach\nWe work at the parcel level within a 1-mile station area (5,279 parcels, ~1,420 acres; distances computed in California State Plane, not Web Mercator — see Methods). For each parcel that permits housing we compute theoretical capacity as lot acreage × maximum dwelling units per acre, using real maximum densities from San José’s zoning code (Title 20, Table 20-136) and the Diridon Station Area Plan for the Downtown core — not assumptions. We then narrow to soft-site capacity by keeping only soft sites: high-capacity parcels that are currently vacant or barely built, identified from OpenStreetMap building-footprint coverage (&lt; 15% of the lot built). This is gross zoned capacity on underbuilt land, not capacity net of existing units. Finally we overlay ACS 2019–2023 demographics and the City’s Equity Index to characterize who lives in the station area today. Full detail and caveats are in Methods & Sources."
+  },
+  {
+    "objectID": "index.html#finding-1-the-capacity-is-real-and-it-is-downtown",
+    "href": "index.html#finding-1-the-capacity-is-real-and-it-is-downtown",
+    "title": "Housing Capacity and Equity Around Diridon Station",
+    "section": "Finding 1 — The capacity is real, and it is downtown",
+    "text": "Finding 1 — The capacity is real, and it is downtown\n\n\n\n\n\n\nFigure 1: The story in one map. Coral parcels are soft sites — underbuilt, high-capacity lots clustered tightly around the station and through the Downtown core. They sit atop neighborhoods shaded by displacement vulnerability.\n\n\n\nThe numbers reframe the opportunity. The six conventional mixed-use / urban-village zones near Diridon — the ones a citywide analysis would flag — cover about 100 acres and permit roughly 14,700 homes. The bulk of the capacity is in the Downtown (DC) core, which covers 300 acres and, under the DSAP’s 350 du/ac ceiling, permits roughly 105,000 homes. Together that is ≈ 120,000 units of gross zoned capacity.\nBut gross capacity overstates what can happen, because much of that land is already developed. Restricting to soft sites — parcels that are vacant, surface parking, or barely built — leaves ≈ 42,500 homes of zoned capacity, ~93% of it in the Downtown core, where roughly 38% of the zoned land is underbuilt today. San José’s downtown parking problem is, in effect, its largest near-transit housing opportunity. Two honest qualifiers: this is gross capacity on redevelopable land, not net of existing units; and about half of that capacity (~21,900 units) sits on parcels with no detected building — some genuinely vacant, but some likely rail, station, or civic land. Excluding every such zero-footprint parcel gives a conservative floor of ≈ 20,600 homes. The defensible range is therefore ~20,600–42,500 (see FAQ).\n\n\n\n\n\n\nFigure 2: Gross zoned capacity (grey) versus zoned capacity on underbuilt soft sites (coral), by zone. The Downtown core dominates both."
+  },
+  {
+    "objectID": "index.html#finding-2-who-lives-there-now",
+    "href": "index.html#finding-2-who-lives-there-now",
+    "title": "Housing Capacity and Equity Around Diridon Station",
+    "section": "Finding 2 — Who lives there now",
+    "text": "Finding 2 — Who lives there now\nThe station area is not a blank slate. Compared with San José as a whole, the 1-mile area is overwhelmingly a renters’ neighborhood and far more dependent on transit — the residents most exposed to rent pressure if redevelopment is not managed.\n\n\n\n\n\n\nFigure 3: Station-area tracts versus citywide San José, ACS 2019–2023. The station area is markedly more renter-occupied and transit-dependent. (Whole tracts intersecting the 1-mile ring, weighted by occupied housing units.)\n\n\n\nEncouragingly, almost none of the soft-site capacity (~4%) sits in the city’s highest-vulnerability tracts (three or more of four flags) — it splits roughly evenly between lower- (~46%) and moderate- (~50%) vulnerability tracts, i.e., largely commercial downtown land rather than established low-income housing. But across the 1-mile area that still means a majority-renter, transit-reliant population earning below the citywide median income — exactly the residents who benefit from new supply and are most vulnerable to being priced out during it."
+  },
+  {
+    "objectID": "index.html#recommendation",
+    "href": "index.html#recommendation",
+    "title": "Housing Capacity and Equity Around Diridon Station",
+    "section": "Recommendation",
+    "text": "Recommendation\nTarget the Downtown soft sites for mixed-income, transit-oriented housing — and pair upzoning with anti-displacement and inclusionary tools from the start.\nThe capacity is concentrated on underbuilt land — mostly surface parking and vacant lots — rather than on occupied housing, which suggests much of it could be added with limited direct displacement of existing residents (a parcel-by- parcel ownership and tenancy check would be the next step to confirm this). But because the surrounding population is renter-majority and transit-dependent, capacity alone risks raising rents faster than it adds affordability.\nThis pairing is the central finding of my own peer-reviewed research. Work on New York City’s rent-stabilization system shows that affordability policy is most effective when tenant protections are coupled with inclusionary zoning that expands supply, rather than either tool used alone.1 And parcel-level analysis of the sequence of neighborhood change shows that displacement pressure can be anticipated — and mitigated — before it arrives.2 Applied to Diridon: adopt soft-site upzoning with on-site affordability requirements, right-of-first-refusal / tenant-protection provisions for the few occupied parcels, and monitoring of the high-renter tracts the new capacity touches."
+  },
+  {
+    "objectID": "index.html#caveats",
+    "href": "index.html#caveats",
+    "title": "Housing Capacity and Equity Around Diridon Station",
+    "section": "Caveats",
+    "text": "Caveats\nThis is theoretical zoned capacity, not a production forecast — it measures what the code permits, not what the market will build. Soft sites are an open- data proxy (footprint coverage), so the Downtown figure is a ceiling: some zero-coverage parcels are the station, rail right-of-way, or open space rather than developable land. Vulnerability flags identify exposure, not predicted displacement, and ACS estimates carry margins of error. See Methods & Sources for thresholds, sensitivity, and data lineage.\n\n\n\n\n\n\n\nSources. City of San José parcels, zoning, and Equity Index; San José Municipal Code Title 20 (Table 20-136); Diridon Station Area Plan (2021); ACS 2019–2023 5-year estimates; OpenStreetMap building footprints. Analysis and figures: Kasey Zapatka, 2026."
+  },
+  {
+    "objectID": "index.html#footnotes",
+    "href": "index.html#footnotes",
+    "title": "Housing Capacity and Equity Around Diridon Station",
+    "section": "Footnotes",
+    "text": "Footnotes\n\n\nZapatka, K., & de Castro Galvao, B. (2022). Affordable Regulation: New York City Rent Stabilization as Housing Affordability Policy. City & Community. doi:10.1177/15356841221123762↩︎\nZapatka, K., & Beck, B. (2020). Does Demand Lead Supply? Fem-Led Neighborhood Change and the Sequence of Gentrification. Urban Studies. doi:10.1177/0042098020940596↩︎"
+  },
+  {
     "objectID": "methods.html",
     "href": "methods.html",
     "title": "Methods & Sources",
@@ -21,11 +126,11 @@
     "text": "Capacity\nFor each parcel we compute theoretical zoned capacity = lot acreage × maximum dwelling units per acre.\nMaximum densities come from the City’s own code, not assumptions:\n\n\n\n\n\n\n\n\nZone\nMax du/ac\nSource\n\n\n\n\nUrban Village (UV), Transit Residential (TR)\n250\nTitle 20, Table 20-136\n\n\nUrban Residential (UR)\n95\nTitle 20, Table 20-136\n\n\nMixed-Use Commercial (MUC)\n50\nTitle 20, Table 20-136\n\n\nMixed-Use Neighborhood (MUN)\n30\nTitle 20, Table 20-136\n\n\nUrban Village Commercial (UVC)\n0 (no residential)\nTitle 20, Table 20-136\n\n\nDowntown (DC)\n350\nGeneral Plan Downtown designation / DSAP (2021)\n\n\n\nSan José’s urban-village districts generally set a minimum density; the maximum for UV/TR/UR is the top of the Table 20-136 range. Downtown (DC) density is governed by the Diridon Station Area Plan and the General Plan Downtown designation rather than a Title 20 du/ac figure."
   },
   {
-    "objectID": "methods.html#soft-sites-net-new-capacity",
-    "href": "methods.html#soft-sites-net-new-capacity",
+    "objectID": "methods.html#soft-sites-soft-site-capacity",
+    "href": "methods.html#soft-sites-soft-site-capacity",
     "title": "Methods & Sources",
-    "section": "Soft sites (net-new capacity)",
-    "text": "Soft sites (net-new capacity)\nA soft site is a high-capacity parcel that is currently vacant, surface parking, or barely built — i.e., where new homes can realistically go. The ideal measure (assessor improvement-to-land value ratio) is not openly published for Santa Clara County; it is a paid bulk-data product. We therefore use an open, reproducible proxy: building-footprint coverage from OpenStreetMap. For each parcel we sum the footprint area of buildings clipped to the lot, divide by lot area, and flag parcels with &lt; 15% coverage as soft sites. Where OSM records building:levels, a rough built-FAR is also computed.\nThis is an underbuilt / vacant proxy, not a true existing-FAR measure: it sees ground coverage, not floors. The 15% threshold is a choice; capacity is stable across reasonable thresholds:\n\n\n\nCoverage threshold\nNet-new soft-site capacity\n\n\n\n\n&lt; 5%\n≈ 29,500\n\n\n&lt; 10%\n≈ 31,200\n\n\n&lt; 15% (used)\n≈ 34,600\n\n\n&lt; 20%\n≈ 41,500\n\n\n&lt; 25%\n≈ 44,400"
+    "section": "Soft sites (soft-site capacity)",
+    "text": "Soft sites (soft-site capacity)\nA soft site is a high-capacity parcel that is currently vacant, surface parking, or barely built — i.e., where new homes can realistically go. The ideal measure (assessor improvement-to-land value ratio) is not openly published for Santa Clara County; it is a paid bulk-data product. We therefore use an open, reproducible proxy: building-footprint coverage from OpenStreetMap. For each parcel we sum the footprint area of buildings clipped to the lot, divide by lot area, and flag parcels with &lt; 15% coverage as soft sites. Where OSM records building:levels, a rough built-FAR is also computed.\nThis is an underbuilt / vacant proxy, not a true existing-FAR measure: it sees ground coverage, not floors. “Soft-site capacity” is the gross zoned capacity on these underbuilt parcels — it is not net of the existing units already on them (most soft sites are non-residential — surface lots, parking, low-rise commercial — but we do not subtract existing units parcel by parcel). The 15% threshold is a choice; capacity is stable across reasonable thresholds:\n\n\n\nCoverage threshold\nSoft-site capacity\n\n\n\n\n&lt; 5%\n≈ 34,200\n\n\n&lt; 10%\n≈ 37,600\n\n\n&lt; 15% (used)\n≈ 42,500\n\n\n&lt; 20%\n≈ 50,400\n\n\n&lt; 25%\n≈ 53,900\n\n\n\nDevelopability floor. About half of the soft-site capacity (~21,900 units, 219 of 351 parcels) sits on parcels with zero detected building footprint — some genuinely vacant or surface parking, some likely rail, station, or civic land carrying Downtown zoning. Excluding all zero-footprint parcels gives a conservative floor of ≈ 20,600 units; the defensible range is therefore ~20,600–42,500. A parcel-level ownership/use screen would tighten this.\nTop soft sites (audit). The largest soft sites driving the total are listed below so a reviewer can judge developability directly (full list: output/tables/top_soft_sites.csv). All are Downtown (DC) except where noted; “verify” marks zero-footprint parcels that need an ownership/use check.\n\n\n\nParcel ID\nAPN\nZone\nAcres\nBuilt coverage\nCapacity\nNote\n\n\n\n\n579060\n25923024\nDC\n9.5\n0.1%\n3,329\nunderbuilt\n\n\n44410\n25927027\nDC\n6.8\n11.1%\n2,394\nunderbuilt\n\n\n342811\n25928041\nDC\n5.4\n0.0%\n1,872\nverify\n\n\n1000002155\n25938142\nDC\n4.4\n0.0%\n1,532\nverify\n\n\n47117\n26135027\nDC\n4.3\n0.0%\n1,492\nverify\n\n\n1000026169\n25942086\nDC\n2.5\n0.2%\n886\nunderbuilt\n\n\n44823\n25941…\nDC\n2.1\n0.5%\n722\nunderbuilt\n\n\n363884\n25928045\nDC\n1.8\n0.4%\n632\nunderbuilt\n\n\n47118\n26135014\nDC\n1.8\n0.0%\n618\nverify\n\n\n1000002078\n46746080\nDC\n1.7\n13.8%\n610\nunderbuilt\n\n\n\nThe largest sites are small (1–10 acres) and concentrated in the Downtown core; five of the top fifteen are zero-footprint parcels flagged for verification."
   },
   {
     "objectID": "methods.html#equity-displacement-vulnerability",
@@ -54,117 +159,5 @@
     "title": "Methods & Sources",
     "section": "Reproducibility",
     "text": "Reproducibility\nThe full pipeline is three Python modules run in order: code/02_diridon_capacity.py → code/03_diridon_equity.py → code/04_diridon_figures.py (+ code/05_diridon_interactive.py). Each writes its outputs to output/tables/ and output/maps/, which this memo reads."
-  },
-  {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "Housing Capacity and Equity Around Diridon Station",
-    "section": "",
-    "text": "Bottom line. Within one mile of Diridon Station, San José’s zoning permits a theoretical ≈ 120,000 homes — but the lever that matters is the Downtown core, which holds ~88% of that capacity and where roughly 38% of the zoned land is underbuilt (largely surface parking and vacant lots). The zoned capacity on those underbuilt “soft sites” is ≈ 42,500 homes — or a conservative ≈ 20,600 if every zero-footprint parcel (some of which may be rail or civic land) is set aside. Either way it is a large supply beside the region’s marquee transit hub, in a neighborhood that is 68% renters and twice as transit-dependent as the rest of the city — so capacity should be paired with anti-displacement and inclusionary tools, not unlocked on its own."
-  },
-  {
-    "objectID": "index.html#the-question",
-    "href": "index.html#the-question",
-    "title": "Housing Capacity and Equity Around Diridon Station",
-    "section": "The question",
-    "text": "The question\nDiridon is the San Francisco Bay Area’s flagship transit-oriented development site: the future convergence of BART’s Silicon Valley extension, California High-Speed Rail, Caltrain, and Google’s “Downtown West.” It is exactly the kind of station area where regions hope to concentrate new housing. Two questions decide whether that hope is realistic:\n\nCapacity — does the zoning actually permit enough housing near the station, and how much of it is on land that could realistically redevelop?\nEquity — who lives there now, and would adding homes put them at risk?"
-  },
-  {
-    "objectID": "index.html#approach",
-    "href": "index.html#approach",
-    "title": "Housing Capacity and Equity Around Diridon Station",
-    "section": "Approach",
-    "text": "Approach\nWe work at the parcel level within a 1-mile station area (5,279 parcels, ~1,420 acres; distances computed in California State Plane, not Web Mercator — see Methods). For each parcel that permits housing we compute theoretical capacity as lot acreage × maximum dwelling units per acre, using real maximum densities from San José’s zoning code (Title 20, Table 20-136) and the Diridon Station Area Plan for the Downtown core — not assumptions. We then narrow to soft-site capacity by keeping only soft sites: high-capacity parcels that are currently vacant or barely built, identified from OpenStreetMap building-footprint coverage (&lt; 15% of the lot built). This is gross zoned capacity on underbuilt land, not capacity net of existing units. Finally we overlay ACS 2022 demographics and the City’s Equity Index to characterize who lives in the station area today. Full detail and caveats are in Methods & Sources."
-  },
-  {
-    "objectID": "index.html#finding-1-the-capacity-is-real-and-it-is-downtown",
-    "href": "index.html#finding-1-the-capacity-is-real-and-it-is-downtown",
-    "title": "Housing Capacity and Equity Around Diridon Station",
-    "section": "Finding 1 — The capacity is real, and it is downtown",
-    "text": "Finding 1 — The capacity is real, and it is downtown\n\n\n\n\n\n\nFigure 1: The story in one map. Coral parcels are soft sites — underbuilt, high-capacity lots clustered tightly around the station and through the Downtown core. They sit atop neighborhoods shaded by displacement vulnerability.\n\n\n\nThe numbers reframe the opportunity. The six conventional mixed-use / urban-village zones near Diridon — the ones a citywide analysis would flag — cover about 100 acres and permit roughly 14,700 homes. The bulk of the capacity is in the Downtown (DC) core, which covers 300 acres and, under the DSAP’s 350 du/ac ceiling, permits roughly 105,000 homes. Together that is ≈ 120,000 units of gross zoned capacity.\nBut gross capacity overstates what can happen, because much of that land is already developed. Restricting to soft sites — parcels that are vacant, surface parking, or barely built — leaves ≈ 42,500 homes of zoned capacity, ~93% of it in the Downtown core, where roughly 38% of the zoned land is underbuilt today. San José’s downtown parking problem is, in effect, its largest near-transit housing opportunity. Two honest qualifiers: this is gross capacity on redevelopable land, not net of existing units; and about half of that capacity (~21,900 units) sits on parcels with no detected building — some genuinely vacant, but some likely rail, station, or civic land. Excluding every such zero-footprint parcel gives a conservative floor of ≈ 20,600 homes. The defensible range is therefore ~20,600–42,500 (see FAQ).\n\n\n\n\n\n\nFigure 2: Gross zoned capacity (grey) versus zoned capacity on underbuilt soft sites (coral), by zone. The Downtown core dominates both."
-  },
-  {
-    "objectID": "index.html#finding-2-who-lives-there-now",
-    "href": "index.html#finding-2-who-lives-there-now",
-    "title": "Housing Capacity and Equity Around Diridon Station",
-    "section": "Finding 2 — Who lives there now",
-    "text": "Finding 2 — Who lives there now\nThe station area is not a blank slate. Compared with San José as a whole, the 1-mile area is overwhelmingly a renters’ neighborhood and far more dependent on transit — the residents most exposed to rent pressure if redevelopment is not managed.\n\n\n\n\n\n\nFigure 3: Station-area tracts versus citywide San José, ACS 2022. The station area is markedly more renter-occupied and transit-dependent. (Whole tracts intersecting the 1-mile ring, weighted by occupied housing units.)\n\n\n\nEncouragingly, most of the soft-site capacity (~84%) sits in moderate- vulnerability tracts (two of four flags) rather than the city’s most disadvantaged neighborhoods — this is largely commercial downtown land, not established low-income housing. But “moderate” here still means majority-renter and transit-reliant (and, in the 1-mile area, lower median income than the city overall): exactly the population that benefits from new supply and is most vulnerable to being priced out during it."
-  },
-  {
-    "objectID": "index.html#recommendation",
-    "href": "index.html#recommendation",
-    "title": "Housing Capacity and Equity Around Diridon Station",
-    "section": "Recommendation",
-    "text": "Recommendation\nTarget the Downtown soft sites for mixed-income, transit-oriented housing — and pair upzoning with anti-displacement and inclusionary tools from the start.\nThe capacity is concentrated on underbuilt land — mostly surface parking and vacant lots — rather than on occupied housing, which suggests much of it could be added with limited direct displacement of existing residents (a parcel-by- parcel ownership and tenancy check would be the next step to confirm this). But because the surrounding population is renter-majority and transit-dependent, capacity alone risks raising rents faster than it adds affordability.\nThis pairing is the central finding of my own peer-reviewed research. Work on New York City’s rent-stabilization system shows that affordability policy is most effective when tenant protections are coupled with inclusionary zoning that expands supply, rather than either tool used alone.1 And parcel-level analysis of the sequence of neighborhood change shows that displacement pressure can be anticipated — and mitigated — before it arrives.2 Applied to Diridon: adopt soft-site upzoning with on-site affordability requirements, right-of-first-refusal / tenant-protection provisions for the few occupied parcels, and monitoring of the high-renter tracts the new capacity touches."
-  },
-  {
-    "objectID": "index.html#caveats",
-    "href": "index.html#caveats",
-    "title": "Housing Capacity and Equity Around Diridon Station",
-    "section": "Caveats",
-    "text": "Caveats\nThis is theoretical zoned capacity, not a production forecast — it measures what the code permits, not what the market will build. Soft sites are an open- data proxy (footprint coverage), so the Downtown figure is a ceiling: some zero-coverage parcels are the station, rail right-of-way, or open space rather than developable land. Vulnerability flags identify exposure, not predicted displacement, and ACS estimates carry margins of error. See Methods & Sources for thresholds, sensitivity, and data lineage.\n\n\n\n\n\n\n\nSources. City of San José parcels, zoning, and Equity Index; San José Municipal Code Title 20 (Table 20-136); Diridon Station Area Plan (2021); ACS 2022 5-year estimates; OpenStreetMap building footprints. Analysis and figures: Kasey Zapatka, 2026."
-  },
-  {
-    "objectID": "index.html#footnotes",
-    "href": "index.html#footnotes",
-    "title": "Housing Capacity and Equity Around Diridon Station",
-    "section": "Footnotes",
-    "text": "Footnotes\n\n\nZapatka, K., & de Castro Galvao, B. (2022). Affordable Regulation: New York City Rent Stabilization as Housing Affordability Policy. City & Community. doi:10.1177/15356841221123762↩︎\nZapatka, K., & Beck, B. (2020). Does Demand Lead Supply? Fem-Led Neighborhood Change and the Sequence of Gentrification. Urban Studies. doi:10.1177/0042098020940596↩︎"
-  },
-  {
-    "objectID": "map.html",
-    "href": "map.html",
-    "title": "Interactive station-area map",
-    "section": "",
-    "text": "Explore the 1-mile Diridon station area parcel by parcel. Tracts are shaded by displacement-vulnerability score (renter share, rent burden, transit dependence, and the City’s Equity Index). Parcels that permit housing sit on top — coral marks soft sites (underbuilt, high-capacity lots where new homes can realistically go); grey marks already-built capacity parcels. Hover any feature for its zoning, capacity, footprint coverage, and neighborhood context. Toggle layers at top-right.\n\n\n\n\n\n\n\n\nSources: City of San José parcels, zoning, and Equity Index; ACS 2022 5-year estimates; OpenStreetMap building footprints. Capacity is theoretical zoned capacity, not a production forecast — see Methods & Sources."
-  },
-  {
-    "objectID": "methods.html#soft-sites-soft-site-capacity",
-    "href": "methods.html#soft-sites-soft-site-capacity",
-    "title": "Methods & Sources",
-    "section": "Soft sites (soft-site capacity)",
-    "text": "Soft sites (soft-site capacity)\nA soft site is a high-capacity parcel that is currently vacant, surface parking, or barely built — i.e., where new homes can realistically go. The ideal measure (assessor improvement-to-land value ratio) is not openly published for Santa Clara County; it is a paid bulk-data product. We therefore use an open, reproducible proxy: building-footprint coverage from OpenStreetMap. For each parcel we sum the footprint area of buildings clipped to the lot, divide by lot area, and flag parcels with &lt; 15% coverage as soft sites. Where OSM records building:levels, a rough built-FAR is also computed.\nThis is an underbuilt / vacant proxy, not a true existing-FAR measure: it sees ground coverage, not floors. “Soft-site capacity” is the gross zoned capacity on these underbuilt parcels — it is not net of the existing units already on them (most soft sites are non-residential — surface lots, parking, low-rise commercial — but we do not subtract existing units parcel by parcel). The 15% threshold is a choice; capacity is stable across reasonable thresholds:\n\n\n\nCoverage threshold\nSoft-site capacity\n\n\n\n\n&lt; 5%\n≈ 34,200\n\n\n&lt; 10%\n≈ 37,600\n\n\n&lt; 15% (used)\n≈ 42,500\n\n\n&lt; 20%\n≈ 50,400\n\n\n&lt; 25%\n≈ 53,900\n\n\n\nDevelopability floor. About half of the soft-site capacity (~21,900 units, 219 of 351 parcels) sits on parcels with zero detected building footprint — some genuinely vacant or surface parking, some likely rail, station, or civic land carrying Downtown zoning. Excluding all zero-footprint parcels gives a conservative floor of ≈ 20,600 units; the defensible range is therefore ~20,600–42,500. A parcel-level ownership/use screen would tighten this."
-  },
-  {
-    "objectID": "faq.html",
-    "href": "faq.html",
-    "title": "FAQ — anticipated reviewer questions",
-    "section": "",
-    "text": "This page answers the questions a planner, economist, or hiring reviewer is most likely to press on. It is deliberately candid about what the analysis does and does not establish. Method detail and data lineage are on the Methods & Sources page."
-  },
-  {
-    "objectID": "faq.html#capacity",
-    "href": "faq.html#capacity",
-    "title": "FAQ — anticipated reviewer questions",
-    "section": "Capacity",
-    "text": "Capacity\n\nIs “soft-site capacity” the same as net-new homes?\nNo — and the memo no longer calls it that. Soft-site capacity is the gross zoned capacity on parcels that are currently underbuilt (vacant, surface parking, or low-rise). It is not net of the existing units on those parcels. Most soft sites are non-residential (parking lots and low-rise commercial), so the subtraction would be small, but the honest framing is “zoned capacity on redevelopable land,” not “new units delivered.” A parcel-by-parcel subtraction of existing units is the right next refinement.\n\n\nWhy apply a uniform 350 du/ac to the whole Downtown core?\n350 du/ac is the maximum of the General Plan Downtown land-use designation, which governs the DC zone (the Diridon Station Area Plan sits on top of it). It is a ceiling, not a typical yield: height limits, FAR, FAA/airport one-engine-out surfaces, historic districts, parking/loading, and tower-spacing rules will often bind before 350 du/ac does. That is exactly why every number is labeled theoretical zoned capacity and why the soft-site figure — not the 120,000 gross — is the one the memo leads with. A height/FAR-aware envelope would lower the Downtown number and is the natural next step.\n\n\nHow are Planned-Development (PD) parcels handled?\nEach parcel’s zoning is stripped of its (PD)/(CL) overlay to its base district (e.g., DC(PD) → DC). I checked whether the approved PD densities (PDDENSITY) could be used instead: within the station area they are null or zero for every target parcel (including all 101 DC(PD) parcels), so the base General-Plan/Title 20 maximums are the only available basis. Where a city later publishes site-specific PD entitlements, those should override the lookup.\n\n\nWhy include Downtown but exclude R-M and other residential zones?\nThe question the memo asks is where the station-area upzoning lever is — and that is the Downtown core plus the mixed-use/urban-village districts. Lower- density residential zones like R-M are largely built out and are not where a TOD capacity debate plays out, so including them would add existing-neighborhood capacity that dilutes the station-area story. It would be a reasonable sensitivity to add; it does not change the finding that Downtown dominates.\n\n\nIs UVC really zero residential capacity?\nYes — under Title 20 Table 20-136, the Urban Village Commercial district does not permit stand-alone residential, so it contributes 0 to residential capacity. It is retained in the parcel set for completeness and shows as 0."
-  },
-  {
-    "objectID": "faq.html#soft-sites",
-    "href": "faq.html#soft-sites",
-    "title": "FAQ — anticipated reviewer questions",
-    "section": "Soft sites",
-    "text": "Soft sites\n\nWhy footprint coverage instead of assessor improvement-to-land ratio?\nThe improvement-to-land ratio is the textbook soft-site measure, but Santa Clara County does not publish parcel-level assessed values — they are a paid bulk-data product. Building-footprint coverage from OpenStreetMap is the open, fully reproducible substitute. The Methods page shows the soft-site total is stable across coverage thresholds (≈29.5k–44.4k from 5%–25%).\n\n\nCould non-developable land (rail, the station, civic, parks) inflate the number?\nPartly, and this is the figure’s main weakness. Parks, public/quasi-public, and agricultural zones (OS, PQP, A) are already excluded — they are not housing-permitting zones, so they never enter the capacity set. The residual risk is large DC-zoned parcels that are functionally rail right-of-way, the station, or other civic uses but carry Downtown zoning: 219 of 351 soft sites have zero detected building coverage (~21,900 units — about half the soft-site total), and the largest few are multi-acre Downtown parcels. Excluding every zero-footprint parcel gives a conservative floor of ≈ 20,600 units, so the defensible range is ~20,600–42,500. A parcel-level ownership/use screen (civic/rail, active entitlements) would tighten this; until then the memo reports the range and treats the Downtown figure as a ceiling.\n\n\nIs “42% vacant or surface parking” a verified land-use statistic?\nNo. It is ~38% of Downtown’s zoned land with less than 15% building coverage — inferred underbuilt land, not classified land use. The memo now says “underbuilt” and names parking/vacant lots as the likely composition rather than asserting a verified land-use split.\n\n\nHow complete is OpenStreetMap downtown, and what if footprints are missing?\nOSM building coverage in downtown San José is strong, but it is not perfect. Missing footprints would over-count soft sites (a built parcel read as empty) — which pushes in the same direction as the non-developable-land issue above. Both are reasons the soft-site capacity is best read as an upper bound rather than a point estimate."
-  },
-  {
-    "objectID": "faq.html#equity",
-    "href": "faq.html#equity",
-    "title": "FAQ — anticipated reviewer questions",
-    "section": "Equity",
-    "text": "Equity\n\nAre the demographics for residents inside the 1-mile ring, or whole tracts?\nWhole census tracts that intersect the ring, weighted by occupied housing units — so the profile describes the surrounding neighborhoods, not only the population strictly inside the circle. Tracts are coarser than the parcel buffer; apportioning ACS to the buffer is possible but adds false precision to margin-of-error-laden estimates.\n\n\nCould a high-income, renter-heavy Downtown tract get flagged “vulnerable”?\nYes — the renter and no-vehicle flags can fire in an affluent downtown tract. That is why vulnerability uses four flags including the City’s own Equity Index (which encodes income, race, language, and education), and why the memo reports that most capacity sits in moderate (2-of-4), not high (3+), vulnerability tracts. The score measures exposure, not a prediction of displacement.\n\n\nIs ACS 2022 too old for a 2026 analysis?\nACS 2022 5-year was the latest stable release when the analysis was built. The structural facts the memo relies on — a renter-majority, transit-dependent downtown — move slowly and are very unlikely to flip in one or two ACS vintages; refreshing to ACS 2023 5-year would be a quick update."
-  },
-  {
-    "objectID": "faq.html#scope-feasibility",
-    "href": "faq.html#scope-feasibility",
-    "title": "FAQ — anticipated reviewer questions",
-    "section": "Scope & feasibility",
-    "text": "Scope & feasibility\n\nWhere is the pro forma / financial feasibility?\nOut of scope, by design. This is a capacity and equity screen, not a feasibility study. It answers “where could homes go and who lives there,” not “what penciling rents, construction costs, parking, impact fees, and inclusionary requirements would make a given site build.” A residual-land-value or achievable-density sensitivity is the natural next phase and would pair well with the soft-site list."
-  },
-  {
-    "objectID": "faq.html#reproducibility",
-    "href": "faq.html#reproducibility",
-    "title": "FAQ — anticipated reviewer questions",
-    "section": "Reproducibility",
-    "text": "Reproducibility\n\nCan a reviewer regenerate these numbers?\nYes. environment.yml pins the spatial stack; the four scripts run in order (02→05) from code/. The pipeline now fails fast — it asserts the station selection returns the expected order of magnitude (≈5,279 parcels in 1 mile, ≈1,199 housing-permitting parcels, ≈13 tracts) and writes outputs atomically (temp file → replace), so a bad run cannot silently overwrite good outputs. Generated tables/figures are committed so the published memo is always traceable to a specific pipeline run."
   }
 ]

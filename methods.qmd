@@ -72,9 +72,30 @@ land carrying Downtown zoning. Excluding all zero-footprint parcels gives a
 conservative floor of **≈ 20,600 units**; the defensible range is therefore
 **~20,600–42,500**. A parcel-level ownership/use screen would tighten this.
 
+**Top soft sites (audit).** The largest soft sites driving the total are listed
+below so a reviewer can judge developability directly (full list:
+`output/tables/top_soft_sites.csv`). All are Downtown (DC) except where noted;
+"verify" marks zero-footprint parcels that need an ownership/use check.
+
+| Parcel ID | APN | Zone | Acres | Built coverage | Capacity | Note |
+|---|---|---|---:|---:|---:|---|
+| 579060 | 25923024 | DC | 9.5 | 0.1% | 3,329 | underbuilt |
+| 44410 | 25927027 | DC | 6.8 | 11.1% | 2,394 | underbuilt |
+| 342811 | 25928041 | DC | 5.4 | 0.0% | 1,872 | verify |
+| 1000002155 | 25938142 | DC | 4.4 | 0.0% | 1,532 | verify |
+| 47117 | 26135027 | DC | 4.3 | 0.0% | 1,492 | verify |
+| 1000026169 | 25942086 | DC | 2.5 | 0.2% | 886 | underbuilt |
+| 44823 | 25941… | DC | 2.1 | 0.5% | 722 | underbuilt |
+| 363884 | 25928045 | DC | 1.8 | 0.4% | 632 | underbuilt |
+| 47118 | 26135014 | DC | 1.8 | 0.0% | 618 | verify |
+| 1000002078 | 46746080 | DC | 1.7 | 13.8% | 610 | underbuilt |
+
+The largest sites are small (1–10 acres) and concentrated in the Downtown core;
+five of the top fifteen are zero-footprint parcels flagged for verification.
+
 ## Equity & displacement vulnerability
 
-Tract indicators are from the **ACS 2022 5-year** estimates, joined to the
+Tract indicators are from the **ACS 2019–2023 5-year** estimates, joined to the
 City's official **Equity Index** (1–5; higher = higher priority). For the 1-mile
 station-area tracts we build a transparent, flag-based vulnerability measure,
 with cut-points set at the **citywide median** so they are defensible rather
@@ -116,7 +137,7 @@ memo separately reports transit-commute share as a descriptive statistic.
   tracts, affordable rental housing (<https://data.sanjoseca.gov>)
 - San José Municipal Code **Title 20** (Zoning), Ch. 20.55, Table 20-136
 - **Diridon Station Area Plan** (amended 2021) & General Plan land use designations
-- **ACS 2022 5-year** estimates via `pygris` / Census API
+- **ACS 2019–2023 5-year** estimates via `pygris` / Census API
 - **OpenStreetMap** building footprints (© OpenStreetMap contributors, ODbL)
 
 ## Reproducibility

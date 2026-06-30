@@ -305,6 +305,20 @@ def summarize_and_export(parcels: gpd.GeoDataFrame) -> dict:
     ])
     save_csv(dev, tables / "softsite_developability_sensitivity.csv")
 
+    # top soft sites — an audit table so a reviewer can see the actual parcels
+    # driving the soft-site total and judge developability. Parcels with a zero
+    # footprint are flagged for verification (vacant/parking vs. rail/civic).
+    top = soft.sort_values("gross_capacity", ascending=False).head(15).copy()
+    top["coverage_pct"] = (top["coverage"] * 100).round(1)
+    top["acres"] = top["acres"].round(2)
+    top["gross_capacity"] = top["gross_capacity"].round().astype(int)
+    top["flag"] = np.where(top["coverage"] == 0,
+                           "zero footprint — verify (parking/vacant or civic/rail)",
+                           "underbuilt")
+    top_out = top[["PARCELID", "APN", "zbase", "acres", "coverage_pct",
+                   "gross_capacity", "flag"]]
+    save_csv(top_out, tables / "top_soft_sites.csv")
+
     # headline numbers
     headline = pd.DataFrame([{
         "station_parcels_1mi": len(parcels),

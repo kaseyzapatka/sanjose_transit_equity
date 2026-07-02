@@ -12,7 +12,8 @@ dependencies:
   - mapclassify        # choropleth binning for geopandas plots
   - requests           # Overpass (OSM) footprints
   - pygris             # ACS + TIGER geometries (ETL)
-  # figures
+  # figures + interactive map
   - matplotlib
+  - folium             # 05_diridon_interactive.py
   # site rendering (optional; or install Quarto separately)
   - pip

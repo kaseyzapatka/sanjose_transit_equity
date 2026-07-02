@@ -25,14 +25,16 @@ existing units is the right next refinement.
 
 ### Why apply a uniform 350 du/ac to the whole Downtown core?
 
-350 du/ac is the maximum of the General Plan **Downtown** land-use designation,
-which governs the DC zone (the Diridon Station Area Plan sits on top of it). It
-is a **ceiling, not a typical yield**: height limits, FAR, FAA/airport
-one-engine-out surfaces, historic districts, parking/loading, and tower-spacing
-rules will often bind *before* 350 du/ac does. That is exactly why every number
-is labeled *theoretical zoned capacity* and why the soft-site figure — not the
-120,000 gross — is the one the memo leads with. A height/FAR-aware envelope would
-lower the Downtown number and is the natural next step.
+Downtown (DC) density is governed by the Envision 2040 General Plan **Downtown**
+designation (with the Diridon Station Area Plan on top of it), which permits up
+to **800 du/ac** in the core. We apply a deliberately **conservative 350 du/ac
+cap** instead: 800 du/ac towers are rare in practice, and height limits, FAR,
+FAA/airport surfaces, historic districts, parking/loading, and tower-spacing
+rules typically bind well before the legal maximum. Even 350 is a **ceiling, not
+a typical yield** — which is why every number is labeled *theoretical zoned
+capacity* and why the soft-site figure, not the 120,000 gross, is the one the
+memo leads with. A height/FAR-aware envelope would refine the Downtown number
+and is the natural next step.
 
 ### How are Planned-Development `(PD)` parcels handled?
 
@@ -65,7 +67,7 @@ It is retained in the parcel set for completeness and shows as 0.
 The improvement-to-land ratio is the textbook soft-site measure, but Santa Clara
 County **does not publish parcel-level assessed values** — they are a paid
 bulk-data product. Building-footprint coverage from OpenStreetMap is the
-open, fully reproducible substitute. The [Methods](methods.qmd) page shows the
+open, fully reproducible substitute. The [Methods & Sources](methods.qmd) page shows the
 soft-site total is stable across coverage thresholds (≈34.2k–53.9k from 5%–25%).
 
 ### Could non-developable land (rail, the station, civic, parks) inflate the number?
@@ -81,7 +83,7 @@ Excluding every zero-footprint parcel gives a conservative floor of **≈ 20,600
 units**, so the defensible range is **~20,600–42,500**. A parcel-level
 ownership/use screen (civic/rail, active entitlements) would tighten this; until
 then the memo reports the range and treats the Downtown figure as a ceiling. The
-[Methods page](methods.qmd) lists the **top soft sites** with their coverage and
+[Methods & Sources](methods.qmd) page lists the **top soft sites** with their coverage and
 a verify/underbuilt flag so the parcels driving the total can be checked
 directly.
 
@@ -112,12 +114,15 @@ margin-of-error-laden estimates.
 
 ### Could a high-income, renter-heavy Downtown tract get flagged "vulnerable"?
 
-Yes — the renter and no-vehicle flags can fire in an affluent downtown tract.
-That is why vulnerability uses **four** flags including the City's own Equity
-Index (which encodes income, race, language, and education), and why the memo
-reports that only ~4% of soft-site capacity sits in the *highest* (3+) tracts —
-the rest splits between lower- and moderate-vulnerability tracts. The score
-measures **exposure**, not a prediction of displacement.
+Yes — the renter and no-vehicle flags can fire in an affluent downtown tract,
+and an earlier version of this score had exactly that problem: high-income
+downtown tracts out-scored genuinely low-income ones. The score now includes an
+explicit **low-income flag** (median household income below the citywide
+median) alongside the City's Equity Index, so income directly enters the
+measure. Under the corrected five-flag score, ~22% of soft-site capacity sits
+in higher-vulnerability (3+) tracts — including the station area's low-income
+tracts — rather than the misleadingly reassuring ~4% the four-flag version
+produced. The score measures **exposure**, not a prediction of displacement.
 
 ### Which ACS vintage is this, and is it current?
 

@@ -67,10 +67,13 @@ MILE_FT = MILE_M / 0.3048006096012192    # 1 mile in US survey feet (≈ 5279.99
 #     UVC ............. residential not permitted -> 0
 MAX_DUAC_TITLE20 = {"UV": 250, "TR": 250, "UR": 95, "MUC": 50, "MUN": 30, "UVC": 0}
 
-#   Downtown (DC): density is governed by the General Plan "Downtown" land use
-#   designation and the Diridon Station Area Plan (DSAP, amended 2021), not by a
-#   Title 20 du/ac figure. The Downtown designation allows up to 350 du/ac.
-DC_DUAC_DSAP = 350
+#   Downtown (DC): density is governed by the Envision 2040 General Plan
+#   "Downtown" designation and the Diridon Station Area Plan (amended 2021), not
+#   a Title 20 du/ac figure. The General Plan permits up to 800 du/ac downtown;
+#   we apply a deliberately conservative 350 du/ac cap (form/FAA/historic
+#   constraints bind long before 800), so Downtown capacity is understated
+#   relative to the legal envelope.
+DC_DUAC_DSAP = 350  # conservative cap; GP ceiling is 800
 
 # Soft-site definition: a target-zone parcel whose building footprint covers
 # less than this share of the lot is treated as vacant / surface-parking /
@@ -84,9 +87,10 @@ SOFT_COVERAGE_THRESHOLD = 0.15
 def load_station_area(miles: float = 1.0) -> gpd.GeoDataFrame:
     """Return parcels whose centroid falls within `miles` of Diridon Station.
 
-    The buffer is built in EPSG:3857 (meters) for an accurate distance; the
-    returned frame is in the source parcel CRS (EPSG:2227, US survey feet) so
-    that SHAPE_Area-derived acreage stays consistent.
+    The buffer is built in the parcels' native EPSG:2227 (California State
+    Plane Zone 3, US survey feet; 1 mile = 5,280 ft), which is locally accurate
+    — NOT in Web Mercator, whose ~1.26x scale inflation at this latitude would
+    shrink the true radius to ~0.8 mile. See methods.qmd, "Study area."
     """
     parcels = gpd.read_parquet(
         DATA / "processed" / "parcels_with_zoning_and_tract_data.parquet"
@@ -187,7 +191,12 @@ def add_footprint_coverage(parcels: gpd.GeoDataFrame,
     """Attach built-coverage and rough built-FAR to each parcel.
 
     Footprints are clipped to parcel boundaries (overlay intersection) so a
-    building spanning a lot line is not double-counted.
+    building spanning a lot line is not double-counted. Coverage uses the
+    per-parcel UNION of clipped footprints so overlapping OSM features cannot
+    double-count ground area. Floor area (built-FAR, a secondary diagnostic)
+    sums levels-weighted footprints without dissolving; multi-level relation
+    holes are also not subtracted — both simplifications bias coverage upward,
+    i.e. toward FEWER soft sites (conservative for the headline).
     """
     inter = gpd.overlay(
         footprints[["geometry", "levels"]],
@@ -198,10 +207,18 @@ def add_footprint_coverage(parcels: gpd.GeoDataFrame,
     inter["fp_sqft"] = inter.geometry.area
     inter["floor_sqft"] = inter["fp_sqft"] * inter["levels"].fillna(1)
     agg = inter.groupby("PARCELID").agg(
-        fp_sqft=("fp_sqft", "sum"),
         floor_sqft=("floor_sqft", "sum"),
         bldg_count=("fp_sqft", "size"),
     ).reset_index()
+
+    # ground coverage from the dissolved (unioned) footprint area per parcel
+    union_area = (
+        inter[["PARCELID", "geometry"]]
+        .dissolve(by="PARCELID")
+        .geometry.area.rename("fp_sqft")
+        .reset_index()
+    )
+    agg = agg.merge(union_area, on="PARCELID", how="left")
 
     out = parcels.merge(agg, on="PARCELID", how="left")
     for col in ["fp_sqft", "floor_sqft", "bldg_count"]:
@@ -246,7 +263,7 @@ def summarize_and_export(parcels: gpd.GeoDataFrame) -> dict:
     # fail fast before writing: a zero-target selection means a CRS/zoning
     # problem upstream; don't overwrite good outputs with empties.
     require(len(target) >= 100,
-            f"target (housing-permitting) parcels = {len(target)} (expected ~750); aborting")
+            f"target (housing-permitting) parcels = {len(target)} (expected ~1,200); aborting")
 
     # by tier
     by_tier = target.groupby("tier").apply(lambda g: pd.Series({

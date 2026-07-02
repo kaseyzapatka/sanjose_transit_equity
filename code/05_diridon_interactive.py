@@ -50,7 +50,7 @@ def build():
         style_function=tract_style,
         tooltip=GeoJsonTooltip(
             fields=tcols,
-            aliases=["Tract:", "Equity Index (1-5):", "Vulnerability (0-4):",
+            aliases=["Tract:", "Equity Index (1-5):", "Vulnerability (0-5):",
                      "Renters:", "Rent-burdened:", "No vehicle:"],
             localize=True,
         ),

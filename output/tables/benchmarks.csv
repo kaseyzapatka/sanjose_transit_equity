@@ -1,0 +1,6 @@
+benchmark,homes,source
+existing_units_est,12834,"ACS 2019-2023 housing units, tract areal apportionment to 1-mile ring"
+planned_homes_in_ring,34333,"SJ Growth Areas 2040 programs apportioned to ring; amended DSAP program (12,900) substituted for the pre-amendment layer figure"
+dsap_program,12900,"Diridon Station Area Plan (amended 2021) development program, ~262-acre plan area only"
+softsite_capacity,42520,this analysis: zoned capacity on underbuilt soft sites
+zoning_envelope,119703,"this analysis: gross zoned capacity, Title 20 / DSAP densities"

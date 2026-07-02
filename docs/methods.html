@@ -4134,12 +4134,17 @@ vertical-align: -.125em;
 </tr>
 <tr class="even">
 <td>Downtown (DC)</td>
-<td>350</td>
-<td>General Plan <em>Downtown</em> designation / DSAP (2021)</td>
+<td>350 (conservative cap)</td>
+<td>Envision 2040 General Plan <em>Downtown</em> designation allows up to 800 du/ac</td>
 </tr>
 </tbody>
 </table>
-<p>San José’s urban-village districts generally set a <em>minimum</em> density; the <em>maximum</em> for UV/TR/UR is the top of the Table 20-136 range. Downtown (DC) density is governed by the Diridon Station Area Plan and the General Plan Downtown designation rather than a Title 20 du/ac figure.</p>
+<p>San José’s urban-village districts generally set a <em>minimum</em> density; the <em>maximum</em> for UV/TR/UR is the top of the Table 20-136 range. Downtown (DC) density is governed by the Envision 2040 General Plan <em>Downtown</em> designation and the Diridon Station Area Plan rather than a Title 20 du/ac figure; the General Plan permits up to <strong>800 du/ac</strong> in the Downtown core. We deliberately apply a <strong>conservative 350 du/ac cap</strong> — high-rise towers at 800 du/ac are rare in practice, and height/FAR, FAA surfaces, and historic constraints bind well before that ceiling — so the Downtown capacity here understates the legal envelope rather than overstating it.</p>
+<p><strong>Benchmarks.</strong> The memo compares the envelope against two yardsticks, both scoped to the same 1-mile geography (<code>output/tables/benchmarks.csv</code>):</p>
+<ul>
+<li><strong>Existing homes (≈ 12,800)</strong> — ACS 2019–2023 tract housing units apportioned by each tract’s share of land area inside the ring. Areal apportionment assumes units are evenly spread within a tract; a parcel-level count would require the county assessor’s per-parcel unit file, which is a paid product.</li>
+<li><strong>Planned homes (≈ 34,300)</strong> — the City’s <strong>Growth Areas 2040</strong> polygons (Downtown, the DSAP, and six urban villages intersect the ring), each area’s planned-housing program apportioned by its share of land inside the ring (per-area detail: <code>output/tables/growth_areas_in_ring.csv</code>). Two adjustments: the DSAP polygon lies mostly <em>inside</em> the Downtown growth area, so its footprint is subtracted from Downtown’s geometry before apportioning (no double counting); and the amended DSAP (2021) program of ~12,900 homes is substituted for the pre-amendment figure (2,710) still carried in the layer. Comparing a single plan area’s program against the whole ring’s envelope would overstate the gap — this apportionment keeps plan and envelope on the same geography.</li>
+</ul>
 </section>
 <section id="soft-sites-soft-site-capacity" class="level2">
 <h2 class="anchored" data-anchor-id="soft-sites-soft-site-capacity">Soft sites (soft-site capacity)</h2>
@@ -4282,18 +4287,20 @@ vertical-align: -.125em;
 </tr>
 </tbody>
 </table>
-<p>The largest sites are small (1–10 acres) and concentrated in the Downtown core; five of the top fifteen are zero-footprint parcels flagged for verification.</p>
+<p>The largest sites are small (1–10 acres) and concentrated in the Downtown core; five of the top fifteen are zero-footprint parcels flagged for verification. (APNs are reproduced verbatim from the City’s parcel file, including one malformed source value.)</p>
 </section>
 <section id="equity-displacement-vulnerability" class="level2">
 <h2 class="anchored" data-anchor-id="equity-displacement-vulnerability">Equity &amp; displacement vulnerability</h2>
-<p>Tract indicators are from the <strong>ACS 2022 5-year</strong> estimates, joined to the City’s official <strong>Equity Index</strong> (1–5; higher = higher priority). For the 1-mile station-area tracts we build a transparent, flag-based vulnerability measure, with cut-points set at the <strong>citywide median</strong> so they are defensible rather than arbitrary:</p>
+<p>Tract indicators are from the <strong>ACS 2019–2023 5-year</strong> estimates, joined to the City’s official <strong>Equity Index</strong> (1–5; higher = higher priority). For the 1-mile station-area tracts we build a transparent, flag-based vulnerability measure, with cut-points set at the <strong>citywide median</strong> so they are defensible rather than arbitrary:</p>
 <ul>
 <li><strong>Renter-majority</strong> — % renters above the citywide median</li>
 <li><strong>Rent-burdened</strong> — % rent-burdened renters above the citywide median</li>
 <li><strong>Transit-dependent</strong> — % households without a vehicle above the citywide median</li>
+<li><strong>Low-income</strong> — median household income below the citywide median (this flag keeps the score from <em>inverting</em> on income: without it, affluent renter-heavy downtown tracts can out-score genuinely low-income tracts)</li>
 <li><strong>Equity-priority</strong> — Equity Index score ≥ 4</li>
 </ul>
-<p><code>vulnerability_score</code> = sum of the four flags (0–4); a tract is <em>high vulnerability</em> at 3+ and <em>moderate</em> at 2. Soft-site capacity is then attributed to each parcel’s tract by GEOID.</p>
+<p><code>vulnerability_score</code> = sum of the five flags (0–5); a tract is <em>high vulnerability</em> at 3+ and <em>moderate</em> at 2. Soft-site capacity is then attributed to each parcel’s tract by GEOID.</p>
+<p>Because the flags use citywide-median cut-points, “higher vulnerability” is a deliberately <strong>inclusive</strong> class (9 of the 13 station-area tracts qualify). The strictest available lens — the City’s own <strong>Equity Index ≥ 4</strong> — flags only one station-area tract, and about <strong>6%</strong> of soft-site capacity falls in such equity-priority tracts. Read the two together: ~22% of capacity touches broadly-vulnerable tracts, ~6% touches the City’s highest-priority equity tracts.</p>
 <p>Two scope notes: (1) the “who lives here” profile uses <strong>whole tracts that intersect</strong> the 1-mile ring (population/housing-unit weighted), not tract populations clipped to the buffer — so it describes the surrounding neighborhoods, not only residents inside the exact ring. (2) “Transit-dependent” in the vulnerability score is operationalized as <strong>no-vehicle households</strong>; the memo separately reports transit-commute share as a descriptive statistic.</p>
 </section>
 <section id="caveats" class="level2">
@@ -4311,13 +4318,13 @@ vertical-align: -.125em;
 <li>City of San José Open Data — parcels, zoning districts, Equity Index census tracts, affordable rental housing (<a href="https://data.sanjoseca.gov" class="uri">https://data.sanjoseca.gov</a>)</li>
 <li>San José Municipal Code <strong>Title 20</strong> (Zoning), Ch. 20.55, Table 20-136</li>
 <li><strong>Diridon Station Area Plan</strong> (amended 2021) &amp; General Plan land use designations</li>
-<li><strong>ACS 2022 5-year</strong> estimates via <code>pygris</code> / Census API</li>
+<li><strong>ACS 2019–2023 5-year</strong> estimates via <code>pygris</code> / Census API</li>
 <li><strong>OpenStreetMap</strong> building footprints (© OpenStreetMap contributors, ODbL)</li>
 </ul>
 </section>
 <section id="reproducibility" class="level2">
 <h2 class="anchored" data-anchor-id="reproducibility">Reproducibility</h2>
-<p>The full pipeline is three Python modules run in order: <code>code/02_diridon_capacity.py</code> → <code>code/03_diridon_equity.py</code> → <code>code/04_diridon_figures.py</code> (+ <code>code/05_diridon_interactive.py</code>). Each writes its outputs to <code>output/tables/</code> and <code>output/maps/</code>, which this memo reads.</p>
+<p>The full pipeline is four scripts run in order (02→05): <code>code/02_diridon_capacity.py</code> → <code>code/03_diridon_equity.py</code> → <code>code/04_diridon_figures.py</code> → <code>code/05_diridon_interactive.py</code>. Each writes its outputs to <code>output/tables/</code> and <code>output/maps/</code>, which this memo reads.</p>
 
 
 </section>

@@ -8,7 +8,7 @@ format:
 
 Explore the 1-mile Diridon station area parcel by parcel. **Tracts** are shaded
 by displacement-vulnerability score (renter share, rent burden, transit
-dependence, and the City's Equity Index). **Parcels** that permit housing sit on
+dependence, low income, and the City's Equity Index). **Parcels** that permit housing sit on
 top — **coral** marks *soft sites* (underbuilt, high-capacity lots where new
 homes can realistically go); grey marks already-built capacity parcels. Hover
 any feature for its zoning, capacity, footprint coverage, and neighborhood

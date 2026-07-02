@@ -16,7 +16,6 @@ import subprocess
 import geopandas as gpd
 import pandas as pd
 # for data visualization 
-import seaborn as sns
 from shapely.geometry import Point
 import matplotlib.pyplot as plt
 import mapclassify
@@ -152,7 +151,6 @@ def save_parquet(gdf, path="../output/output.parquet"):
 # import necessary libraries
 import pandas as pd
 import matplotlib.pyplot as plt
-import seaborn as sns
 import geopandas as gpd
 from shapely.geometry import Point
 

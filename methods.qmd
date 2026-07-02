@@ -32,12 +32,38 @@ maximum dwelling units per acre.
 | Mixed-Use Commercial (MUC) | 50 | Title 20, Table 20-136 |
 | Mixed-Use Neighborhood (MUN) | 30 | Title 20, Table 20-136 |
 | Urban Village Commercial (UVC) | 0 (no residential) | Title 20, Table 20-136 |
-| Downtown (DC) | 350 | General Plan *Downtown* designation / DSAP (2021) |
+| Downtown (DC) | 350 (conservative cap) | Envision 2040 General Plan *Downtown* designation allows up to 800 du/ac |
 
 San José's urban-village districts generally set a *minimum* density; the
 *maximum* for UV/TR/UR is the top of the Table 20-136 range. Downtown (DC)
-density is governed by the Diridon Station Area Plan and the General Plan
-Downtown designation rather than a Title 20 du/ac figure.
+density is governed by the Envision 2040 General Plan *Downtown* designation and
+the Diridon Station Area Plan rather than a Title 20 du/ac figure; the General
+Plan permits up to **800 du/ac** in the Downtown core. We deliberately apply a
+**conservative 350 du/ac cap** — high-rise towers at 800 du/ac are rare in
+practice, and height/FAR, FAA surfaces, and historic constraints bind well
+before that ceiling — so the Downtown capacity here understates the legal
+envelope rather than overstating it.
+
+**Benchmarks.** The memo compares the envelope against two yardsticks, both
+scoped to the same 1-mile geography (`output/tables/benchmarks.csv`):
+
+- **Existing homes (~12,800)** — ACS 2019–2023 tract housing units apportioned
+  by each tract's share of land area inside the ring. Areal apportionment
+  assumes units are evenly spread within a tract; a parcel-level count would
+  require the county assessor's per-parcel unit file, which is a paid product.
+- **Planned homes (~34,300)** — the City's **Growth Areas 2040** polygons
+  (Downtown, the DSAP, and six urban villages intersect the ring), each area's
+  planned-housing program apportioned by its share of land inside the ring
+  (per-area detail: `output/tables/growth_areas_in_ring.csv`). Two adjustments:
+  the DSAP polygon lies mostly *inside* the Downtown growth area, so its
+  footprint is subtracted from Downtown's geometry before apportioning (no
+  double counting); and the amended DSAP (2021) program of ~12,900 homes is
+  substituted for the pre-amendment figure (2,710) still carried in the layer.
+  Comparing a single plan area's program against the whole ring's envelope
+  would overstate the gap — this apportionment keeps plan and envelope on the
+  same geography. The layer is fetched once from the City's ArcGIS service and
+  cached (`data/raw/sj_growth_areas_2040.geojson`) so the analysis reproduces
+  offline.
 
 ## Soft sites (soft-site capacity)
 
@@ -59,17 +85,17 @@ threshold is a choice; capacity is stable across reasonable thresholds:
 
 | Coverage threshold | Soft-site capacity |
 |---|---|
-| < 5% | ≈ 34,200 |
-| < 10% | ≈ 37,600 |
-| **< 15% (used)** | **≈ 42,500** |
-| < 20% | ≈ 50,400 |
-| < 25% | ≈ 53,900 |
+| < 5% | ~34,200 |
+| < 10% | ~37,600 |
+| **< 15% (used)** | **~42,500** |
+| < 20% | ~50,400 |
+| < 25% | ~53,900 |
 
 **Developability floor.** About half of the soft-site capacity (~21,900 units,
 219 of 351 parcels) sits on parcels with *zero* detected building footprint —
 some genuinely vacant or surface parking, some likely rail, station, or civic
 land carrying Downtown zoning. Excluding all zero-footprint parcels gives a
-conservative floor of **≈ 20,600 units**; the defensible range is therefore
+conservative floor of **~20,600 units**; the defensible range is therefore
 **~20,600–42,500**. A parcel-level ownership/use screen would tighten this.
 
 **Top soft sites (audit).** The largest soft sites driving the total are listed
@@ -92,6 +118,8 @@ below so a reviewer can judge developability directly (full list:
 
 The largest sites are small (1–10 acres) and concentrated in the Downtown core;
 five of the top fifteen are zero-footprint parcels flagged for verification.
+(APNs are reproduced verbatim from the City's parcel file, including one
+malformed source value.)
 
 ## Equity & displacement vulnerability
 
@@ -104,11 +132,22 @@ than arbitrary:
 - **Renter-majority** — % renters above the citywide median
 - **Rent-burdened** — % rent-burdened renters above the citywide median
 - **Transit-dependent** — % households without a vehicle above the citywide median
+- **Low-income** — median household income below the citywide median (this flag
+  keeps the score from *inverting* on income: without it, affluent renter-heavy
+  downtown tracts can out-score genuinely low-income tracts)
 - **Equity-priority** — Equity Index score ≥ 4
 
-`vulnerability_score` = sum of the four flags (0–4); a tract is *high
+`vulnerability_score` = sum of the five flags (0–5); a tract is *high
 vulnerability* at 3+ and *moderate* at 2. Soft-site capacity is then attributed
 to each parcel's tract by GEOID.
+
+Because the flags use citywide-median cut-points, "higher vulnerability" is a
+deliberately **inclusive** class (9 of the 13 station-area tracts qualify). The
+strictest available lens — the City's own **Equity Index ≥ 4** — flags only one
+station-area tract, and about **6%** of soft-site capacity falls in such
+equity-priority tracts. Read the two together: ~22% of capacity touches
+broadly-vulnerable tracts, ~6% touches the City's highest-priority equity
+tracts.
 
 Two scope notes: (1) the "who lives here" profile uses **whole tracts that
 intersect** the 1-mile ring (population/housing-unit weighted), not tract
@@ -142,8 +181,7 @@ memo separately reports transit-commute share as a descriptive statistic.
 
 ## Reproducibility
 
-The full pipeline is three Python modules run in order:
+The full pipeline is four scripts run in order (02→05):
 `code/02_diridon_capacity.py` → `code/03_diridon_equity.py` →
-`code/04_diridon_figures.py` (+ `code/05_diridon_interactive.py`). Each writes
-its outputs to `output/tables/`
-and `output/maps/`, which this memo reads.
+`code/04_diridon_figures.py` → `code/05_diridon_interactive.py`. Each writes
+its outputs to `output/tables/` and `output/maps/`, which this memo reads.

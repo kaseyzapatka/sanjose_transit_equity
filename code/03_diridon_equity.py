@@ -50,6 +50,22 @@ PROFILE_COLS = [
     "no_vehicle_pct", "public_transit_pct", "median_income", "median_rent",
 ]
 
+# Adopted development program of the amended Diridon Station Area Plan (2021):
+# ~12,900 new homes with a 25% affordability goal. Cited in the DSAP and in the
+# City of San Jose's Transit-Oriented Communities commitment letter to MTC.
+# (The General Plan's Growth Areas layer still carries the pre-amendment figure
+# of 2,710 for the DSAP polygon; we use the amended program and footnote this.)
+DSAP_PROGRAM_UNITS = 12_900
+
+# City of San Jose "Growth Areas 2040" — General Plan growth-area polygons with
+# the City's own planned HOUSING/JOBS per area. Fetched once and cached.
+GROWTH_AREAS_URL = (
+    "https://geo.sanjoseca.gov/server/rest/services/OPN/OPN_OpenDataService/"
+    "MapServer/520/query?where=1%3D1"
+    "&outFields=NAME,ID,TYPE,HOUSING,JOBS,GROWTHAREA,HORIZON,URBANVILLAGETYPE"
+    "&outSR=2227&f=geojson"
+)
+
 
 # ---------------------------------------------------------------------------
 # Step 1 — Tracts + Equity Index
@@ -81,20 +97,27 @@ def flag_vulnerability(tracts: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
       - renter_majority   : % renters above citywide median
       - rent_burdened     : % rent-burdened above citywide median
       - transit_dependent : % no-vehicle households above citywide median
+      - low_income        : median household income below citywide median
+                            (keeps the score from inverting on income: without
+                            it, affluent renter-heavy downtown tracts can
+                            out-score genuinely low-income tracts)
       - equity_priority   : Equity Index score in top two categories (>= 4)
-    vulnerability_score = sum of the four flags (0-4);
+    vulnerability_score = sum of the five flags (0-5);
     high_vulnerability  = score >= 3.
     """
     s = tracts.copy()
     city_med = {c: s[c].median() for c in
-                ["pct_renters", "rent_burdened_pct", "no_vehicle_pct"]}
+                ["pct_renters", "rent_burdened_pct", "no_vehicle_pct",
+                 "median_income"]}
 
     s["renter_majority"] = s["pct_renters"] > city_med["pct_renters"]
     s["rent_burdened"] = s["rent_burdened_pct"] > city_med["rent_burdened_pct"]
     s["transit_dependent"] = s["no_vehicle_pct"] > city_med["no_vehicle_pct"]
+    s["low_income"] = s["median_income"] < city_med["median_income"]
     s["equity_priority"] = s["equity_score"] >= 4
 
-    flags = ["renter_majority", "rent_burdened", "transit_dependent", "equity_priority"]
+    flags = ["renter_majority", "rent_burdened", "transit_dependent",
+             "low_income", "equity_priority"]
     s["vulnerability_score"] = s[flags].sum(axis=1)
     s["high_vulnerability"] = s["vulnerability_score"] >= 3
     s.attrs["citywide_medians"] = city_med
@@ -177,6 +200,103 @@ def capacity_by_vulnerability(flagged_tracts: gpd.GeoDataFrame) -> pd.DataFrame:
 
 
 # ---------------------------------------------------------------------------
+# Step 5 — Benchmarks (today's stock vs planned homes vs zoning envelope)
+# ---------------------------------------------------------------------------
+def load_growth_areas(refresh: bool = False) -> gpd.GeoDataFrame:
+    """City of San Jose Growth Areas 2040 polygons (cached GeoJSON, EPSG:2227)."""
+    cache = DATA / "raw" / "sj_growth_areas_2040.geojson"
+    if refresh or not cache.exists():
+        import requests
+        resp = requests.get(GROWTH_AREAS_URL, timeout=60)
+        resp.raise_for_status()
+        cache.parent.mkdir(parents=True, exist_ok=True)
+        cache.write_bytes(resp.content)
+    ga = gpd.read_file(cache)
+    check_geo(ga, "growth areas", min_rows=50)
+    ga["planned_housing"] = pd.to_numeric(ga["HOUSING"], errors="coerce").fillna(0)
+    return ga
+
+
+def planned_homes_in_ring(ring) -> tuple[float, pd.DataFrame]:
+    """Apportion the City's planned housing (Growth Areas 2040) to the ring.
+
+    Each growth area contributes HOUSING x (its area inside the ring / its
+    total area). Two special cases, both verified spatially:
+      - The DSAP polygon lies ~79% inside the Downtown growth-area polygon, so
+        the DSAP footprint is SUBTRACTED from Downtown's geometry before
+        apportioning Downtown's program (no double counting; Downtown's full
+        area stays in the denominator).
+      - The Growth Areas layer still carries the pre-amendment DSAP figure
+        (2,710); we substitute the amended DSAP (2021) program of ~12,900.
+    """
+    ga = load_growth_areas()
+    dsap_mask = ga["NAME"].str.contains("Diridon", case=False, na=False)
+    ga.loc[dsap_mask, "planned_housing"] = DSAP_PROGRAM_UNITS
+
+    dsap_geom = ga.loc[dsap_mask, "geometry"].union_all()
+    rows = []
+    for _, r in ga.iterrows():
+        geom, denom = r.geometry, r.geometry.area
+        if r["NAME"] == "Downtown":
+            geom = geom.difference(dsap_geom)  # carve out DSAP; keep full denom
+        in_ring = geom.intersection(ring).area
+        if in_ring <= 0:
+            continue
+        share = in_ring / denom
+        rows.append({
+            "name": r["NAME"], "type": r["TYPE"],
+            "planned_housing": round(r["planned_housing"]),
+            "acres_total": round(denom / 43_560, 1),
+            "acres_in_ring": round(in_ring / 43_560, 1),
+            "share_in_ring": round(share, 3),
+            "planned_in_ring": round(r["planned_housing"] * share),
+        })
+    detail = pd.DataFrame(rows).sort_values("planned_in_ring", ascending=False)
+    save_csv(detail, OUTPUT / "tables" / "growth_areas_in_ring.csv")
+    return float(detail["planned_in_ring"].sum()), detail
+
+
+def export_benchmarks(tracts: gpd.GeoDataFrame, miles: float = 1.0) -> pd.DataFrame:
+    """Write the comparison the memo's capacity figure reads.
+
+    Existing homes are estimated by AREAL APPORTIONMENT: each tract's ACS
+    housing-unit count times the share of its land area inside the 1-mile
+    ring. Planned homes apportion the City's Growth Areas 2040 programs the
+    same way, so both benchmarks share the ring's geography. Coarser than a
+    parcel count (the assessor's per-parcel unit file is a paid product) but
+    the right altitude for an area-level benchmark.
+    """
+    tm = tracts.to_crs(STATE_PLANE)
+    pt = gpd.GeoSeries([Point(*DIRIDON_LONLAT)], crs=4326).to_crs(STATE_PLANE).iloc[0]
+    ring = pt.buffer(miles * MILE_FT)
+    frac = tm.geometry.intersection(ring).area / tm.geometry.area
+    existing = float((tm["housing_units_total"] * frac).sum())
+    require(existing > 5_000, f"existing-units estimate {existing:,.0f} implausibly low")
+
+    planned, detail = planned_homes_in_ring(ring)
+    require(planned > 1_000, f"planned-homes estimate {planned:,.0f} implausibly low")
+
+    head = pd.read_csv(OUTPUT / "tables" / "capacity_headline.csv").iloc[0]
+    bench = pd.DataFrame([
+        {"benchmark": "existing_units_est", "homes": round(existing),
+         "source": "ACS 2019-2023 housing units, tract areal apportionment to 1-mile ring"},
+        {"benchmark": "planned_homes_in_ring", "homes": round(planned),
+         "source": "SJ Growth Areas 2040 programs apportioned to ring; amended DSAP "
+                   "program (12,900) substituted for the pre-amendment layer figure"},
+        {"benchmark": "dsap_program", "homes": DSAP_PROGRAM_UNITS,
+         "source": "Diridon Station Area Plan (amended 2021) development program, "
+                   "~262-acre plan area only"},
+        {"benchmark": "softsite_capacity", "homes": int(head["softsite_capacity"]),
+         "source": "this analysis: zoned capacity on underbuilt soft sites"},
+        {"benchmark": "zoning_envelope", "homes": int(head["gross_capacity"]),
+         "source": "this analysis: gross zoned capacity, Title 20 / DSAP densities"},
+    ])
+    save_csv(bench, OUTPUT / "tables" / "benchmarks.csv")
+    bench.attrs["growth_area_detail"] = detail
+    return bench
+
+
+# ---------------------------------------------------------------------------
 # Pipeline
 # ---------------------------------------------------------------------------
 def run(miles: float = 1.0) -> gpd.GeoDataFrame:
@@ -204,7 +324,8 @@ def run(miles: float = 1.0) -> gpd.GeoDataFrame:
     # per-tract profile
     prof_cols = (["GEOID", "equity_score"] + PROFILE_COLS +
                  ["renter_majority", "rent_burdened", "transit_dependent",
-                  "equity_priority", "vulnerability_score", "high_vulnerability"])
+                  "low_income", "equity_priority", "vulnerability_score",
+                  "high_vulnerability"])
     profile = station[prof_cols].sort_values("vulnerability_score", ascending=False)
     save_csv(profile.round(1), tables / "station_tract_profile.csv")
 
@@ -225,6 +346,11 @@ def run(miles: float = 1.0) -> gpd.GeoDataFrame:
           f"{cxv.attrs['share_high_vuln']}%")
     print(f"Share in equity-priority tracts (score >= 4): "
           f"{cxv.attrs['share_equity_priority']}%")
+
+    # benchmarks for the capacity-vs-plan figure
+    bench = export_benchmarks(tracts, miles=miles)
+    print("\n=== Benchmarks (homes) ===")
+    print(bench[["benchmark", "homes"]].to_string(index=False))
 
     # tract layer for hero-map shading
     save_parquet(station.to_crs(4326), maps / "diridon_station_tracts.geoparquet")

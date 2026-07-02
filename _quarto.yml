@@ -17,7 +17,7 @@ website:
   navbar:
     pinned: true
     left:
-      - text: "Memo"
+      - text: "Analysis"
         href: index.qmd
       - text: "Interactive Map"
         href: map.qmd

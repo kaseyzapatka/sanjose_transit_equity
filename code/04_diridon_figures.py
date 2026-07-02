@@ -54,9 +54,13 @@ def hero_map():
 
     fig, ax = plt.subplots(figsize=(9, 9))
 
-    # vulnerability shading underneath (single plum ramp by score 0-4)
-    for score, color in enumerate(vs.PLUM):
-        sub = tracts_clip[tracts_clip["vulnerability_score"] == score]
+    # vulnerability shading underneath — three classes matching the memo's
+    # language: Lower (0-1 flags), Moderate (2), Higher (3+ of 5)
+    vclass = {"lower": (vs.PLUM[1], tracts_clip["vulnerability_score"] <= 1),
+              "moderate": (vs.PLUM[2], tracts_clip["vulnerability_score"] == 2),
+              "higher": (vs.PLUM[3], tracts_clip["vulnerability_score"] >= 3)}
+    for color, mask in vclass.values():
+        sub = tracts_clip[mask]
         if len(sub):
             sub.plot(ax=ax, color=color, edgecolor="white", linewidth=0.6, zorder=1)
     tracts_clip.boundary.plot(ax=ax, color="white", linewidth=0.6, zorder=2)
@@ -90,6 +94,7 @@ def hero_map():
         Patch(facecolor=vs.CORAL, label="Soft site — underbuilt, high capacity"),
         Patch(facecolor=vs.NEUTRAL_D, label="Already-built capacity parcel"),
         Patch(facecolor=vs.PLUM[3], label="Higher-vulnerability tract"),
+        Patch(facecolor=vs.PLUM[2], label="Moderate-vulnerability tract"),
         Patch(facecolor=vs.PLUM[1], label="Lower-vulnerability tract"),
         Line2D([0], [0], color=vs.INK, lw=1.1, linestyle=(0, (5, 4)), label="1-mile radius"),
     ]
@@ -143,10 +148,46 @@ def capacity_by_zone():
 
 
 # ---------------------------------------------------------------------------
-# 3. Who lives here — dumbbell (station vs citywide)
+# 3. Capacity vs plan — today's stock, the DSAP program, the zoning envelope
+# ---------------------------------------------------------------------------
+def capacity_vs_plan():
+    b = pd.read_csv(TABLES / "benchmarks.csv").set_index("benchmark")["homes"]
+    rows = [
+        ("Homes today (est.)", b["existing_units_est"], vs.NEUTRAL_D),
+        ("New homes City plans call for", b["planned_homes_in_ring"], vs.PLUM[3]),
+        ("Zoning envelope (max buildout)", b["zoning_envelope"], vs.CORAL),
+    ]
+    y = np.arange(len(rows))[::-1]
+
+    fig, ax = plt.subplots(figsize=(8.5, 3.2))
+    envelope = b["zoning_envelope"]
+    for yi, (label, val, color) in zip(y, rows):
+        ax.barh(yi, val, color=color, height=0.58, zorder=2)
+        emphasize = val == envelope
+        ax.text(val + envelope * 0.012, yi, f"~{round(val, -2):,.0f}",
+                va="center", fontsize=12 if emphasize else 10,
+                fontweight="heavy" if emphasize else "normal", color=vs.INK)
+    ax.set_yticks(y)
+    ax.set_yticklabels([r[0] for r in rows])
+    ax.xaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f"{int(x):,}"))
+    ax.margins(x=0.14)
+
+    ratio = b["zoning_envelope"] / b["planned_homes_in_ring"]
+    ax.set_title(f"Zoning allows about {ratio:.1f}× more homes than City plans call for")
+    fig.text(0.01, -0.04,
+             "Homes today: ACS 2019–2023 housing units, apportioned to the 1-mile ring. "
+             "Planned homes: SJ Growth Areas 2040 programs apportioned to the ring\n"
+             "(amended DSAP program substituted for its polygon). Envelope: this analysis "
+             "(Title 20 / DSAP maximum densities); a ceiling, not a forecast.",
+             fontsize=7.5, color=vs.MUTE)
+    return vs.save(fig, "capacity_vs_plan", FIGS)
+
+
+# ---------------------------------------------------------------------------
+# 4. Who lives here — dumbbell (station vs citywide) + income panel
 # ---------------------------------------------------------------------------
 def who_lives_here():
-    df = pd.read_csv(TABLES / "who_lives_here.csv")
+    df = pd.read_csv(TABLES / "who_lives_here.csv").set_index("indicator")
     show = {
         "pct_renters": "Renters (% of households)",
         "rent_burdened_pct": "Rent-burdened renters (%)",
@@ -154,29 +195,49 @@ def who_lives_here():
         "public_transit_pct": "Commute by transit (%)",
         "poverty_rate": "Poverty rate (%)",
     }
-    df = df[df["indicator"].isin(show)].copy()
-    df["name"] = df["indicator"].map(show)
-    df = df.sort_values("station_area")
-    y = np.arange(len(df))
+    pct = df.loc[list(show)].rename(index=show).sort_values("station_area")
+    y = np.arange(len(pct))
 
-    fig, ax = plt.subplots(figsize=(8.5, 4.4))
-    ax.hlines(y, df["citywide"], df["station_area"], color=vs.NEUTRAL_D, lw=2.2, zorder=1)
-    ax.scatter(df["citywide"], y, s=70, color=vs.MUTE, zorder=2, label="Citywide San Jose")
-    ax.scatter(df["station_area"], y, s=85, color=vs.CORAL, zorder=3, label="Diridon 1-mile")
+    # two stacked panels: percent indicators on top, income strip below
+    fig, (ax, ax2) = plt.subplots(
+        2, 1, figsize=(8.5, 5.6),
+        gridspec_kw={"height_ratios": [4.2, 1], "hspace": 0.45})
+
+    # top panel — percent indicators
+    ax.hlines(y, pct["citywide"], pct["station_area"], color=vs.NEUTRAL_D, lw=2.2, zorder=1)
+    ax.scatter(pct["citywide"], y, s=70, color=vs.MUTE, zorder=2, label="Citywide San Jose")
+    ax.scatter(pct["station_area"], y, s=85, color=vs.CORAL, zorder=3, label="Diridon 1-mile")
     ax.set_yticks(y)
-    ax.set_yticklabels(df["name"])
+    ax.set_yticklabels(pct.index)
     ax.set_xlabel("Percent")
-
-    for yi, c, s in zip(y, df["citywide"], df["station_area"]):
+    for yi, c, s in zip(y, pct["citywide"], pct["station_area"]):
         ax.text(s + 1.2, yi, f"{s:.0f}%", va="center", fontsize=8.5,
                 color=vs.CORAL, fontweight="bold")
         ax.text(c - 1.2, yi, f"{c:.0f}%", va="center", ha="right", fontsize=8.5, color=vs.MUTE)
-
-    ax.set_title("The station area is a renters' neighborhood, twice as transit-dependent")
     ax.legend(loc="lower right", frameon=False, fontsize=9)
-    ax.margins(x=0.12)
+    ax.margins(x=0.14)
+    ax.set_title("The station area: more renters, more transit-dependent, lower incomes",
+                 fontsize=13, pad=12)
+
+    # bottom strip — median household income (same dumbbell language, $ scale)
+    inc = df.loc["median_income"]
+    ax2.hlines(0, inc["citywide"] / 1e3, inc["station_area"] / 1e3,
+               color=vs.NEUTRAL_D, lw=2.2, zorder=1)
+    ax2.scatter(inc["citywide"] / 1e3, 0, s=70, color=vs.MUTE, zorder=2)
+    ax2.scatter(inc["station_area"] / 1e3, 0, s=85, color=vs.CORAL, zorder=3)
+    ax2.text(inc["station_area"] / 1e3, 0.22, f"${inc['station_area']/1e3:,.0f}k",
+             ha="center", va="bottom", fontsize=8.5, color=vs.CORAL, fontweight="bold")
+    ax2.text(inc["citywide"] / 1e3, 0.22, f"${inc['citywide']/1e3:,.0f}k",
+             ha="center", va="bottom", fontsize=8.5, color=vs.MUTE)
+    ax2.set_yticks([0])
+    ax2.set_yticklabels(["Median household income"])
+    ax2.set_ylim(-0.6, 0.9)
+    ax2.set_xlim(0, 160)  # zero baseline so the income gap reads at true scale
+    ax2.xaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f"${int(x)}k"))
+    ax2.set_xlabel("Median household income (thousands of dollars)")
+
     fig.text(0.01, -0.02,
-             "Population-weighted tract averages within 1 mile vs all San Jose tracts. "
+             "Tract averages weighted by occupied housing units, within 1 mile vs all San Jose tracts. "
              "Source: ACS 2019–2023 5-year estimates.", fontsize=7.5, color=vs.MUTE)
     return vs.save(fig, "who_lives_here", FIGS)
 
@@ -185,6 +246,7 @@ def run():
     vs.apply_style()
     print("hero_map ->", hero_map())
     print("capacity_by_zone ->", capacity_by_zone())
+    print("capacity_vs_plan ->", capacity_vs_plan())
     print("who_lives_here ->", who_lives_here())
 
 

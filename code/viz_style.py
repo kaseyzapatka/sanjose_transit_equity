@@ -6,7 +6,6 @@
 # for the one main point — soft sites (where new homes can actually go).
 # ==========================================================================
 
-import matplotlib as mpl
 import matplotlib.pyplot as plt
 
 # --- palette ---------------------------------------------------------------
@@ -20,8 +19,8 @@ NEUTRAL_D = "#B3AB9C"    # slightly darker neutral
 CORAL = "#E25A33"        # THE accent — soft sites, the headline number
 CORAL_SOFT = "#F0B59F"   # light coral for fills/secondary emphasis
 
-# plum sequential ramp for vulnerability score (0 -> 4)
-PLUM = ["#EFE9EC", "#D8C7D5", "#B79DBB", "#8F6E9C", "#5E4B6B"]
+# plum sequential ramp for vulnerability score (0 -> 5)
+PLUM = ["#EFE9EC", "#D8C7D5", "#B79DBB", "#8F6E9C", "#5E4B6B", "#3E3049"]
 PLUM_DEEP = "#5E4B6B"
 
 CAPACITY_TIER = {                      # capacity tiers (kept low-saturation)

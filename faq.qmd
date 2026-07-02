@@ -25,14 +25,16 @@ existing units is the right next refinement.
 
 ### Why apply a uniform 350 du/ac to the whole Downtown core?
 
-350 du/ac is the maximum of the General Plan **Downtown** land-use designation,
-which governs the DC zone (the Diridon Station Area Plan sits on top of it). It
-is a **ceiling, not a typical yield**: height limits, FAR, FAA/airport
-one-engine-out surfaces, historic districts, parking/loading, and tower-spacing
-rules will often bind *before* 350 du/ac does. That is exactly why every number
-is labeled *theoretical zoned capacity* and why the soft-site figure — not the
-120,000 gross — is the one the memo leads with. A height/FAR-aware envelope would
-lower the Downtown number and is the natural next step.
+Downtown (DC) density is governed by the Envision 2040 General Plan **Downtown**
+designation (with the Diridon Station Area Plan on top of it), which permits up
+to **800 du/ac** in the core. We apply a deliberately **conservative 350 du/ac
+cap** instead: 800 du/ac towers are rare in practice, and height limits, FAR,
+FAA/airport surfaces, historic districts, parking/loading, and tower-spacing
+rules typically bind well before the legal maximum. Even 350 is a **ceiling, not
+a typical yield** — which is why every number is labeled *theoretical zoned
+capacity* and why the soft-site figure, not the 120,000 gross, is the one the
+memo leads with. A height/FAR-aware envelope would refine the Downtown number
+and is the natural next step.
 
 ### How are Planned-Development `(PD)` parcels handled?
 
@@ -42,6 +44,20 @@ district (e.g., `DC(PD)` → `DC`). I checked whether the approved PD densities
 zero for every target parcel** (including all 101 `DC(PD)` parcels), so the base
 General-Plan/Title 20 maximums are the only available basis. Where a city later
 publishes site-specific PD entitlements, those should override the lookup.
+
+### Is the "City plans ~34,300 homes" comparison apples-to-apples with the envelope?
+
+Yes — by construction. An earlier draft compared the DSAP's ~12,900-home
+program (a ~262-acre plan area) against the full ring's envelope, which
+overstated the gap. The current figure sums the City's own **Growth Areas
+2040** programs across *every* plan area intersecting the ring — Downtown, the
+DSAP, and six urban villages — each counted only for the share of its land
+inside the 1-mile circle, so plan and envelope share the same geography. Two
+adjustments are footnoted in the memo: the DSAP polygon overlaps the Downtown
+growth area (its footprint is subtracted from Downtown's before apportioning),
+and the amended DSAP (2021) program of ~12,900 homes replaces the pre-amendment
+figure (2,710) still carried in the City's layer. Per-area detail:
+`output/tables/growth_areas_in_ring.csv`.
 
 ### Why include Downtown but exclude `R-M` and other residential zones?
 
@@ -65,8 +81,8 @@ It is retained in the parcel set for completeness and shows as 0.
 The improvement-to-land ratio is the textbook soft-site measure, but Santa Clara
 County **does not publish parcel-level assessed values** — they are a paid
 bulk-data product. Building-footprint coverage from OpenStreetMap is the
-open, fully reproducible substitute. The [Methods](methods.qmd) page shows the
-soft-site total is stable across coverage thresholds (≈34.2k–53.9k from 5%–25%).
+open, fully reproducible substitute. The [Methods & Sources](methods.qmd) page shows the
+soft-site total is stable across coverage thresholds (~34.2k–53.9k from 5%–25%).
 
 ### Could non-developable land (rail, the station, civic, parks) inflate the number?
 
@@ -77,20 +93,24 @@ risk is large **`DC`-zoned** parcels that are functionally rail right-of-way,
 the station, or other civic uses but carry Downtown zoning: **219 of 351 soft
 sites have zero detected building coverage (~21,900 units — about half the
 soft-site total)**, and the largest few are multi-acre Downtown parcels.
-Excluding every zero-footprint parcel gives a conservative floor of **≈ 20,600
+Excluding every zero-footprint parcel gives a conservative floor of **~20,600
 units**, so the defensible range is **~20,600–42,500**. A parcel-level
-ownership/use screen (civic/rail, active entitlements) would tighten this; until
-then the memo reports the range and treats the Downtown figure as a ceiling. The
-[Methods page](methods.qmd) lists the **top soft sites** with their coverage and
+ownership/use screen (civic/rail, active entitlements) would tighten this — the
+City's *Major Private Development Footprints* layer can flag soft sites with
+active projects (several likely overlap Google's Downtown West) but records no
+unit counts, so netting them out needs hand-collected data. Until then the memo
+reports the range and treats the Downtown figure as a ceiling. The
+[Methods & Sources](methods.qmd) page lists the **top soft sites** with their coverage and
 a verify/underbuilt flag so the parcels driving the total can be checked
 directly.
 
-### Is "42% vacant or surface parking" a verified land-use statistic?
+### Is "38% underbuilt, much of it surface parking" a verified land-use statistic?
 
-No. It is **~38% of Downtown's zoned land with less than 15% building coverage** —
-inferred underbuilt land, not classified land use. The memo now says
-"underbuilt" and names parking/vacant lots as the likely composition rather than
-asserting a verified land-use split.
+Partly. The **38%** is measured: the share of Downtown's zoned land with less
+than 15% building coverage. The "much of it surface parking" is an *inference*
+from that low coverage, not a classified land-use tabulation — which is why the
+memo says "underbuilt" for the number and names parking/vacant lots as the
+likely composition rather than asserting a verified split.
 
 ### How complete is OpenStreetMap downtown, and what if footprints are missing?
 
@@ -112,12 +132,15 @@ margin-of-error-laden estimates.
 
 ### Could a high-income, renter-heavy Downtown tract get flagged "vulnerable"?
 
-Yes — the renter and no-vehicle flags can fire in an affluent downtown tract.
-That is why vulnerability uses **four** flags including the City's own Equity
-Index (which encodes income, race, language, and education), and why the memo
-reports that only ~4% of soft-site capacity sits in the *highest* (3+) tracts —
-the rest splits between lower- and moderate-vulnerability tracts. The score
-measures **exposure**, not a prediction of displacement.
+Yes — the renter and no-vehicle flags can fire in an affluent downtown tract,
+and an earlier version of this score had exactly that problem: high-income
+downtown tracts out-scored genuinely low-income ones. The score now includes an
+explicit **low-income flag** (median household income below the citywide
+median) alongside the City's Equity Index, so income directly enters the
+measure. Under the corrected five-flag score, ~22% of soft-site capacity sits
+in higher-vulnerability (3+) tracts — including the station area's low-income
+tracts — rather than the misleadingly reassuring ~4% the four-flag version
+produced. The score measures **exposure**, not a prediction of displacement.
 
 ### Which ACS vintage is this, and is it current?
 
@@ -144,8 +167,8 @@ with the soft-site list.
 
 Yes. `environment.yml` pins the spatial stack; the four scripts run in order
 (`02`→`05`) from `code/`. The pipeline now **fails fast** — it asserts the
-station selection returns the expected order of magnitude (≈5,279 parcels in 1
-mile, ≈1,199 housing-permitting parcels, ≈13 tracts) and writes outputs
+station selection returns the expected order of magnitude (~5,279 parcels in 1
+mile, ~1,199 housing-permitting parcels, ~13 tracts) and writes outputs
 **atomically** (temp file → replace), so a bad run cannot silently overwrite good
 outputs. Generated tables/figures are committed so the published memo is always
 traceable to a specific pipeline run.

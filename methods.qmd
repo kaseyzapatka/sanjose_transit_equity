@@ -47,11 +47,11 @@ envelope rather than overstating it.
 **Benchmarks.** The memo compares the envelope against two yardsticks, both
 scoped to the same 1-mile geography (`output/tables/benchmarks.csv`):
 
-- **Existing homes (≈ 12,800)** — ACS 2019–2023 tract housing units apportioned
+- **Existing homes (~12,800)** — ACS 2019–2023 tract housing units apportioned
   by each tract's share of land area inside the ring. Areal apportionment
   assumes units are evenly spread within a tract; a parcel-level count would
   require the county assessor's per-parcel unit file, which is a paid product.
-- **Planned homes (≈ 34,300)** — the City's **Growth Areas 2040** polygons
+- **Planned homes (~34,300)** — the City's **Growth Areas 2040** polygons
   (Downtown, the DSAP, and six urban villages intersect the ring), each area's
   planned-housing program apportioned by its share of land inside the ring
   (per-area detail: `output/tables/growth_areas_in_ring.csv`). Two adjustments:
@@ -61,7 +61,9 @@ scoped to the same 1-mile geography (`output/tables/benchmarks.csv`):
   substituted for the pre-amendment figure (2,710) still carried in the layer.
   Comparing a single plan area's program against the whole ring's envelope
   would overstate the gap — this apportionment keeps plan and envelope on the
-  same geography.
+  same geography. The layer is fetched once from the City's ArcGIS service and
+  cached (`data/raw/sj_growth_areas_2040.geojson`) so the analysis reproduces
+  offline.
 
 ## Soft sites (soft-site capacity)
 
@@ -83,17 +85,17 @@ threshold is a choice; capacity is stable across reasonable thresholds:
 
 | Coverage threshold | Soft-site capacity |
 |---|---|
-| < 5% | ≈ 34,200 |
-| < 10% | ≈ 37,600 |
-| **< 15% (used)** | **≈ 42,500** |
-| < 20% | ≈ 50,400 |
-| < 25% | ≈ 53,900 |
+| < 5% | ~34,200 |
+| < 10% | ~37,600 |
+| **< 15% (used)** | **~42,500** |
+| < 20% | ~50,400 |
+| < 25% | ~53,900 |
 
 **Developability floor.** About half of the soft-site capacity (~21,900 units,
 219 of 351 parcels) sits on parcels with *zero* detected building footprint —
 some genuinely vacant or surface parking, some likely rail, station, or civic
 land carrying Downtown zoning. Excluding all zero-footprint parcels gives a
-conservative floor of **≈ 20,600 units**; the defensible range is therefore
+conservative floor of **~20,600 units**; the defensible range is therefore
 **~20,600–42,500**. A parcel-level ownership/use screen would tighten this.
 
 **Top soft sites (audit).** The largest soft sites driving the total are listed

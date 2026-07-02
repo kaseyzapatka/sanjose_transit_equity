@@ -4008,7 +4008,7 @@ vertical-align: -.125em;
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
     <a class="nav-link" href="./index.html"> 
-<span class="menu-text">Memo</span></a>
+<span class="menu-text">Analysis</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./map.html"> 
@@ -4142,8 +4142,8 @@ vertical-align: -.125em;
 <p>San José’s urban-village districts generally set a <em>minimum</em> density; the <em>maximum</em> for UV/TR/UR is the top of the Table 20-136 range. Downtown (DC) density is governed by the Envision 2040 General Plan <em>Downtown</em> designation and the Diridon Station Area Plan rather than a Title 20 du/ac figure; the General Plan permits up to <strong>800 du/ac</strong> in the Downtown core. We deliberately apply a <strong>conservative 350 du/ac cap</strong> — high-rise towers at 800 du/ac are rare in practice, and height/FAR, FAA surfaces, and historic constraints bind well before that ceiling — so the Downtown capacity here understates the legal envelope rather than overstating it.</p>
 <p><strong>Benchmarks.</strong> The memo compares the envelope against two yardsticks, both scoped to the same 1-mile geography (<code>output/tables/benchmarks.csv</code>):</p>
 <ul>
-<li><strong>Existing homes (≈ 12,800)</strong> — ACS 2019–2023 tract housing units apportioned by each tract’s share of land area inside the ring. Areal apportionment assumes units are evenly spread within a tract; a parcel-level count would require the county assessor’s per-parcel unit file, which is a paid product.</li>
-<li><strong>Planned homes (≈ 34,300)</strong> — the City’s <strong>Growth Areas 2040</strong> polygons (Downtown, the DSAP, and six urban villages intersect the ring), each area’s planned-housing program apportioned by its share of land inside the ring (per-area detail: <code>output/tables/growth_areas_in_ring.csv</code>). Two adjustments: the DSAP polygon lies mostly <em>inside</em> the Downtown growth area, so its footprint is subtracted from Downtown’s geometry before apportioning (no double counting); and the amended DSAP (2021) program of ~12,900 homes is substituted for the pre-amendment figure (2,710) still carried in the layer. Comparing a single plan area’s program against the whole ring’s envelope would overstate the gap — this apportionment keeps plan and envelope on the same geography.</li>
+<li><strong>Existing homes (~12,800)</strong> — ACS 2019–2023 tract housing units apportioned by each tract’s share of land area inside the ring. Areal apportionment assumes units are evenly spread within a tract; a parcel-level count would require the county assessor’s per-parcel unit file, which is a paid product.</li>
+<li><strong>Planned homes (~34,300)</strong> — the City’s <strong>Growth Areas 2040</strong> polygons (Downtown, the DSAP, and six urban villages intersect the ring), each area’s planned-housing program apportioned by its share of land inside the ring (per-area detail: <code>output/tables/growth_areas_in_ring.csv</code>). Two adjustments: the DSAP polygon lies mostly <em>inside</em> the Downtown growth area, so its footprint is subtracted from Downtown’s geometry before apportioning (no double counting); and the amended DSAP (2021) program of ~12,900 homes is substituted for the pre-amendment figure (2,710) still carried in the layer. Comparing a single plan area’s program against the whole ring’s envelope would overstate the gap — this apportionment keeps plan and envelope on the same geography. The layer is fetched once from the City’s ArcGIS service and cached (<code>data/raw/sj_growth_areas_2040.geojson</code>) so the analysis reproduces offline.</li>
 </ul>
 </section>
 <section id="soft-sites-soft-site-capacity" class="level2">
@@ -4160,27 +4160,27 @@ vertical-align: -.125em;
 <tbody>
 <tr class="odd">
 <td>&lt; 5%</td>
-<td>≈ 34,200</td>
+<td>~34,200</td>
 </tr>
 <tr class="even">
 <td>&lt; 10%</td>
-<td>≈ 37,600</td>
+<td>~37,600</td>
 </tr>
 <tr class="odd">
 <td><strong>&lt; 15% (used)</strong></td>
-<td><strong>≈ 42,500</strong></td>
+<td><strong>~42,500</strong></td>
 </tr>
 <tr class="even">
 <td>&lt; 20%</td>
-<td>≈ 50,400</td>
+<td>~50,400</td>
 </tr>
 <tr class="odd">
 <td>&lt; 25%</td>
-<td>≈ 53,900</td>
+<td>~53,900</td>
 </tr>
 </tbody>
 </table>
-<p><strong>Developability floor.</strong> About half of the soft-site capacity (~21,900 units, 219 of 351 parcels) sits on parcels with <em>zero</em> detected building footprint — some genuinely vacant or surface parking, some likely rail, station, or civic land carrying Downtown zoning. Excluding all zero-footprint parcels gives a conservative floor of <strong>≈ 20,600 units</strong>; the defensible range is therefore <strong>~20,600–42,500</strong>. A parcel-level ownership/use screen would tighten this.</p>
+<p><strong>Developability floor.</strong> About half of the soft-site capacity (~21,900 units, 219 of 351 parcels) sits on parcels with <em>zero</em> detected building footprint — some genuinely vacant or surface parking, some likely rail, station, or civic land carrying Downtown zoning. Excluding all zero-footprint parcels gives a conservative floor of <strong>~20,600 units</strong>; the defensible range is therefore <strong>~20,600–42,500</strong>. A parcel-level ownership/use screen would tighten this.</p>
 <p><strong>Top soft sites (audit).</strong> The largest soft sites driving the total are listed below so a reviewer can judge developability directly (full list: <code>output/tables/top_soft_sites.csv</code>). All are Downtown (DC) except where noted; “verify” marks zero-footprint parcels that need an ownership/use check.</p>
 <table class="caption-top table">
 <thead>
